@@ -79,15 +79,32 @@ function Export-Data {
                 colour=$ws.Cells($r,(ColNum "Q")).Value2; amalgamation=$ws.Cells($r,(ColNum "R")).Value2
                 bespokeLot=$ws.Cells($r,(ColNum "S")).Value2; friendsFamily=$ws.Cells($r,(ColNum "T")).Value2
                 curStatus=$ws.Cells($r,(ColNum "X")).Value2; brief=$ws.Cells($r,(ColNum "Y")).Value2
-                sketch=$ws.Cells($r,(ColNum "Z")).Value2; feasibility=$ws.Cells($r,(ColNum "AA")).Value2
+                sketch=$ws.Cells($r,(ColNum "Z")).Value2
+                layoutApproved=$ws.Cells($r,(ColNum "AA")).Value2
+                feasibility=$ws.Cells($r,(ColNum "AB")).Value2
                 cad=$ws.Cells($r,(ColNum "AC")).Value2; qsEst=$ws.Cells($r,(ColNum "AD")).Value2
                 confirm=$ws.Cells($r,(ColNum "AE")).Value2; designEnd=$ws.Cells($r,(ColNum "AF")).Value2
                 builder=$ws.Cells($r,(ColNum "AG")).Value2; commercial=$ws.Cells($r,(ColNum "AH")).Value2
                 qsCert=$ws.Cells($r,(ColNum "AI")).Value2; dovApproval=$ws.Cells($r,(ColNum "AJ")).Value2
                 dovIssue=$ws.Cells($r,(ColNum "AK")).Value2; dovDeadline=$ws.Cells($r,(ColNum "AL")).Value2
                 hickory=$ws.Cells($r,(ColNum "AM")).Value2; planning=$ws.Cells($r,(ColNum "AN")).Value2
-                modApproval=$ws.Cells($r,(ColNum "AO")).Value2; bic=$ws.Cells($r,(ColNum "AZ")).Value2
-                nextSteps=$ws.Cells($r,(ColNum "BA")).Value2; lead=$ws.Cells($r,(ColNum "BB")).Value2
+                modApproval=$ws.Cells($r,(ColNum "AO")).Value2
+                correspondence=$(
+                    $asCol = ColNum "AS"
+                    $hlUrl = $null
+                    foreach ($hl in $ws.Hyperlinks) {
+                        if ($hl.Range.Row -eq $r -and $hl.Range.Column -eq $asCol) {
+                            $hlUrl = $hl.Address
+                            if ($hlUrl -match '^(\.\.[\\/])+(.+)$') {
+                                $hlUrl = 'https://uiservicesptyltd.sharepoint.com/' + $Matches[2]
+                            }
+                            break
+                        }
+                    }
+                    if ($hlUrl) { $hlUrl } else { $ws.Cells($r, $asCol).Value2 }
+                )
+                bic=$ws.Cells($r,(ColNum "BA")).Value2
+                nextSteps=$ws.Cells($r,(ColNum "BB")).Value2; lead=$ws.Cells($r,(ColNum "BC")).Value2
                 bespokeLink=$(
                     $arCol = ColNum "AR"
                     $hlUrl = $null
@@ -130,10 +147,12 @@ function Export-Data {
                     "dovDeadline:$(XlDate $u.dovDeadline),hickory:$(XlDate $u.hickory)," +
                     "planning:$(XlDate $u.planning),modApproval:$(XlDate $u.modApproval)," +
                     "sketch:$(XlBool $u.sketch),feasibility:$(XlBool $u.feasibility)," +
+                    "layoutApproved:$(XlBool $u.layoutApproved)," +
                     "cad:$(XlBool $u.cad),qsEst:$(XlBool $u.qsEst),confirm:$(XlBool $u.confirm)," +
                     "builder:$(XlBool $u.builder),commercial:$(XlBool $u.commercial)," +
                     "dovApproval:$(XlBool $u.dovApproval),bic:$(XlStr $u.bic)," +
                     "lead:$(XlStr $u.lead),nextSteps:$(XlStr $u.nextSteps)," +
+                    "correspondence:$(XlStr $u.correspondence)," +
                     "bespokeLink:$(XlStr $u.bespokeLink)}$comma"
             $lines.Add($line)
         }
