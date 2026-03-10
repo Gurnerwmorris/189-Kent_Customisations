@@ -764,7 +764,7 @@ function UnitsTab(props){
     // Table
     h("div",{style:{background:"#ffffff",border:"1px solid #e0dbd2",borderRadius:4,overflowX:"auto"}},
       h("div",{style:{minWidth:"1800px"}},
-      h("div",{style:{display:"grid",gridTemplateColumns:"90px 200px 100px 110px 125px 160px 55px 52px 60px 40px 42px 110px 150px 1fr 36px",
+      h("div",{style:{display:"grid",gridTemplateColumns:"90px 200px 100px 110px 125px 55px 52px 60px 40px 42px 110px 170px 1fr 36px",
         padding:"11px 16px",borderBottom:"1px solid #ebe7e0"}},
         [
           {label:"Unit",      key:"unit"},
@@ -772,7 +772,6 @@ function UnitsTab(props){
           {label:"Agent",     key:"agent"},
           {label:"Spec Sheet",key:"spec"},
           {label:"Status",    key:"status"},
-          {label:"Stage",     key:"stage"},
           {label:"BIC",       key:"bic"},
           {label:"Amalg",     key:"amalg"},
           {label:"Bespoke",   key:"bespoke"},
@@ -803,7 +802,7 @@ function UnitsTab(props){
           var stage=getStage(u);
           var hasAction=!!(u.bic&&u.nextSteps);
           return h("div",{key:u.unit,
-            style:{display:"grid",gridTemplateColumns:"90px 200px 100px 110px 125px 160px 55px 52px 60px 40px 42px 110px 150px 1fr 36px",
+            style:{display:"grid",gridTemplateColumns:"90px 200px 100px 110px 125px 55px 52px 60px 40px 42px 110px 170px 1fr 36px",
               padding:"0",borderBottom:"1px solid #181818",transition:"background 0.1s",cursor:"default"}},
             // Unit col
             h("div",{style:{padding:"0 14px",display:"flex",alignItems:"stretch"}},
@@ -825,7 +824,6 @@ function UnitsTab(props){
               ) : h("span",{style:{color:"#ccc7be",fontSize:11}},"—")
             ),
             h("div",{style:{padding:"10px 8px"}},h(SBadge,{s:u.status})),
-            h("div",{style:{padding:"10px 8px",fontSize:10,color:stage.color}},stage.label),
             h("div",{style:{padding:"10px 8px"}},h(BicBadge,{bic:u.bic})),
             h("div",{style:{padding:"10px 4px",textAlign:"center"}},h(YNBadge,{v:u.amalgamation})),
             h("div",{style:{padding:"10px 4px",textAlign:"center"}},h(YNBadge,{v:u.bespokeLot})),
@@ -848,20 +846,26 @@ function UnitsTab(props){
               u.exchanged ? new Date(u.exchanged).toLocaleDateString("en-AU",{day:"2-digit",month:"short",year:"2-digit"}) : h("span",{style:{color:"#ccc7be"}},"—")
             ),
             // Current Status
-            h("div",{style:{padding:"8px 6px",fontSize:10,color:"#4a4540",
-              overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
-              display:"flex",alignItems:"center"}},
-              u.curStatus
-                ? (u.curStatus.startsWith("NA")
-                    ? h("span",{style:{color:"#bbb5ad",fontSize:9}},"—")
-                    : h("span",{style:{fontSize:9,padding:"2px 6px",borderRadius:2,
-                        background:"#f0f8f0",color:"#2a7a4a",border:"1px solid #a0d8b8",
-                        whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
-                        display:"block",maxWidth:"100%"}},
-                        u.curStatus.replace("1. Written Brief Due / Design Briefing Session","1. Brief Due").replace("1.1 Sketch Plan Issued","1.1 Sketch Issued")
-                      )
-                  )
-                : h("span",{style:{color:"#ccc7be",fontSize:9}},"—")
+            h("div",{style:{padding:"8px 6px",display:"flex",alignItems:"center",overflow:"hidden"}},
+              (function(){
+                if(!u.curStatus||u.curStatus.startsWith("NA")) return h("span",{style:{color:"#bbb5ad",fontSize:9}},"—");
+                var s=u.curStatus;
+                var style;
+                if(s.startsWith("1.")&&!s.startsWith("1.1"))
+                  style={background:"#fdf0f0",color:"#c94040",border:"1px solid #f5b8b8"};
+                else if(s.startsWith("1.1"))
+                  style={background:"#fdf8ee",color:"#b07a20",border:"1px solid #e8d89a"};
+                else if(s.startsWith("2."))
+                  style={background:"#eef5fd",color:"#3a7acc",border:"1px solid #b8d4f8"};
+                else if(s.startsWith("3."))
+                  style={background:"#f5eefa",color:"#8a40b0",border:"1px solid #d4a8f0"};
+                else if(s.startsWith("4.")||s.startsWith("5."))
+                  style={background:"#f0faf4",color:"#2a7a4a",border:"1px solid #a0d8b8"};
+                else
+                  style={background:"#f5f3ef",color:"#7a736a",border:"1px solid #ddd8d0"};
+                return h("span",{style:Object.assign({fontSize:9,padding:"2px 6px",borderRadius:2,
+                  whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",display:"block",maxWidth:"100%"},style)},s);
+              })()
             ),
             // Next Steps
             h("div",{style:{padding:"10px 8px 10px 0",fontSize:11,color:"#666",
@@ -1052,7 +1056,7 @@ function GanttTab(props){
             {n:"8.", contract:true, label:"Modification Approval",  clause:"Clause 33.1",        timing:"Fixed sunset date",     desc:"Contractual deadline by which planning modification approval must be obtained."},
           ]},
         ].map(function(phase){
-          var stExp=useState(false); var exp=stExp[0],setExp=stExp[1];
+          var stExp=useState(true); var exp=stExp[0],setExp=stExp[1];
           return h("div",{key:phase.phase,
             style:{border:"1px solid "+phase.color+"33",borderTop:"3px solid "+phase.color,
               borderRadius:"0 0 4px 4px",background:"#ffffff",overflow:"hidden"}},
