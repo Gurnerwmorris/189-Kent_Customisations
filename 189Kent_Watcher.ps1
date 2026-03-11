@@ -81,19 +81,26 @@ function Export-Data {
                 curStatus=$ws.Cells($r,(ColNum "X")).Value2; brief=$ws.Cells($r,(ColNum "Y")).Value2
                 sketch=$ws.Cells($r,(ColNum "Z")).Value2
                 layoutApproved=$ws.Cells($r,(ColNum "AA")).Value2
-                feasibility=$ws.Cells($r,(ColNum "AB")).Value2
-                cad=$ws.Cells($r,(ColNum "AC")).Value2; qsEst=$ws.Cells($r,(ColNum "AD")).Value2
-                confirm=$ws.Cells($r,(ColNum "AE")).Value2; designEnd=$ws.Cells($r,(ColNum "AF")).Value2
-                builder=$ws.Cells($r,(ColNum "AG")).Value2; commercial=$ws.Cells($r,(ColNum "AH")).Value2
-                qsCert=$ws.Cells($r,(ColNum "AI")).Value2; dovApproval=$ws.Cells($r,(ColNum "AJ")).Value2
-                dovIssue=$ws.Cells($r,(ColNum "AK")).Value2; dovDeadline=$ws.Cells($r,(ColNum "AL")).Value2
-                hickory=$ws.Cells($r,(ColNum "AM")).Value2; planning=$ws.Cells($r,(ColNum "AN")).Value2
-                modApproval=$ws.Cells($r,(ColNum "AO")).Value2
+                costsIssued=$ws.Cells($r,(ColNum "AB")).Value2   # AB: 1.3 Cost ranges issued to purchaser
+                feasibility=$ws.Cells($r,(ColNum "AC")).Value2   # AC: 1.4 Feasibility Review
+                cad=$ws.Cells($r,(ColNum "AD")).Value2           # AD: 1.5 FJC CAD Plans
+                qsEst=$ws.Cells($r,(ColNum "AE")).Value2         # AE: 1.6 QS Estimate Issued
+                confirm=$ws.Cells($r,(ColNum "AF")).Value2       # AF: 1.7 Purchaser Confirmation
+                designEnd=$ws.Cells($r,(ColNum "AG")).Value2     # AG: 2. Design Period End
+                builder=$ws.Cells($r,(ColNum "AH")).Value2       # AH: 2.1 Builder Budget Pricing
+                commercial=$ws.Cells($r,(ColNum "AI")).Value2    # AI: 2.2 Internal Commercial Review
+                qsCert=$ws.Cells($r,(ColNum "AJ")).Value2        # AJ: 3. QS Cost Certification
+                dovApproval=$ws.Cells($r,(ColNum "AK")).Value2   # AK: 3.1 Internal Approval to Issue DoV
+                dovIssue=$ws.Cells($r,(ColNum "AL")).Value2      # AL: 4. DoV Issue Date
+                dovDeadline=$ws.Cells($r,(ColNum "AM")).Value2   # AM: 5. Purchaser DoV Execution Deadline
+                hickory=$ws.Cells($r,(ColNum "AN")).Value2       # AN: 6. Instructed to Hickory
+                planning=$ws.Cells($r,(ColNum "AO")).Value2      # AO: 7. Recommended Planning Submission
+                modApproval=$ws.Cells($r,(ColNum "AP")).Value2   # AP: 8. Modification Approval Deadline
                 correspondence=$(
-                    $asCol = ColNum "AS"
+                    $atCol = ColNum "AT"                         # AT: CORRESPONDENCE
                     $hlUrl = $null
                     foreach ($hl in $ws.Hyperlinks) {
-                        if ($hl.Range.Row -eq $r -and $hl.Range.Column -eq $asCol) {
+                        if ($hl.Range.Row -eq $r -and $hl.Range.Column -eq $atCol) {
                             $hlUrl = $hl.Address
                             if ($hlUrl -match '^(\.\.[\\/])+(.+)$') {
                                 $hlUrl = 'https://uiservicesptyltd.sharepoint.com/' + $Matches[2]
@@ -101,15 +108,15 @@ function Export-Data {
                             break
                         }
                     }
-                    if ($hlUrl) { $hlUrl } else { $ws.Cells($r, $asCol).Value2 }
+                    if ($hlUrl) { $hlUrl } else { $ws.Cells($r, $atCol).Value2 }
                 )
-                bic=$ws.Cells($r,(ColNum "BA")).Value2
-                nextSteps=$ws.Cells($r,(ColNum "BB")).Value2; lead=$ws.Cells($r,(ColNum "BC")).Value2
+                bic=$ws.Cells($r,(ColNum "BB")).Value2           # BB: BALL IN COURT
+                nextSteps=$ws.Cells($r,(ColNum "BC")).Value2     # BC: NEXT STEPS
                 bespokeLink=$(
-                    $arCol = ColNum "AR"
+                    $asCol = ColNum "AS"                         # AS: BESPOKE PLAN
                     $hlUrl = $null
                     foreach ($hl in $ws.Hyperlinks) {
-                        if ($hl.Range.Row -eq $r -and $hl.Range.Column -eq $arCol) {
+                        if ($hl.Range.Row -eq $r -and $hl.Range.Column -eq $asCol) {
                             $hlUrl = $hl.Address
                             # Excel stores SharePoint links as relative paths (../../...) when the
                             # file is synced via OneDrive. Strip the leading ../ traversals and
@@ -120,7 +127,7 @@ function Export-Data {
                             break
                         }
                     }
-                    if ($hlUrl) { $hlUrl } else { $ws.Cells($r, $arCol).Value2 }
+                    if ($hlUrl) { $hlUrl } else { $ws.Cells($r, $asCol).Value2 }
                 )
             }
             $r++
@@ -146,12 +153,12 @@ function Export-Data {
                     "qsCert:$(XlDate $u.qsCert),dovIssue:$(XlDate $u.dovIssue)," +
                     "dovDeadline:$(XlDate $u.dovDeadline),hickory:$(XlDate $u.hickory)," +
                     "planning:$(XlDate $u.planning),modApproval:$(XlDate $u.modApproval)," +
-                    "sketch:$(XlBool $u.sketch),feasibility:$(XlBool $u.feasibility)," +
-                    "layoutApproved:$(XlBool $u.layoutApproved)," +
+                    "sketch:$(XlBool $u.sketch),layoutApproved:$(XlBool $u.layoutApproved)," +
+                    "costsIssued:$(XlBool $u.costsIssued),feasibility:$(XlBool $u.feasibility)," +
                     "cad:$(XlBool $u.cad),qsEst:$(XlBool $u.qsEst),confirm:$(XlBool $u.confirm)," +
                     "builder:$(XlBool $u.builder),commercial:$(XlBool $u.commercial)," +
                     "dovApproval:$(XlBool $u.dovApproval),bic:$(XlStr $u.bic)," +
-                    "lead:$(XlStr $u.lead),nextSteps:$(XlStr $u.nextSteps)," +
+                    "nextSteps:$(XlStr $u.nextSteps)," +
                     "correspondence:$(XlStr $u.correspondence)," +
                     "bespokeLink:$(XlStr $u.bespokeLink)}$comma"
             $lines.Add($line)
