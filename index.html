@@ -285,26 +285,34 @@ if (typeof window.UNITS_FROM_EXCEL !== "undefined" && window.UNITS_FROM_EXCEL.le
   UNITS = window.UNITS_FROM_EXCEL;
 }
 
-var BIC_COL = {DW:"#4c9af0", WM:"#c9a84c", ED:"#b06cd0", GD:"#4caf82", TBC:"#888"};
+var BIC_COL  = {DW:"#4c9af0", WM:"#c9a84c", ED:"#b06cd0", GD:"#4caf82", TBC:"#888"};
+var BIC_NAME = {WM:"Will Morris", DW:"Deb Wiltshire", ED:"Elle Dearin", GD:"Giuditta De Santis", TBC:"TBC"};
 var GRP_COL = {design:"#4c9af0", cost:"#b06cd0", legal:"#4caf82", delivery:"#4ecece"};
 
 var ALL_MILESTONES = [
-  {key:"brief",       label:"1. Written Brief",          group:"design",   isBool:false, color:"#4c9af0"},
-  {key:"sketch",      label:"1.1 Sketch Issued",         group:"design",   isBool:true,  color:"#4c9af0"},
-  {key:"feasibility", label:"1.2 Feasibility Review",    group:"design",   isBool:true,  color:"#4c9af0"},
-  {key:"cad",         label:"1.3 CAD Plans",             group:"design",   isBool:true,  color:"#4c9af0"},
-  {key:"qsEst",       label:"1.4 QS Estimate",           group:"design",   isBool:true,  color:"#4c9af0"},
-  {key:"confirm",     label:"1.5 Purchaser Confirmation",group:"design",   isBool:true,  color:"#4c9af0"},
-  {key:"designEnd",   label:"2. Design Period End",      group:"design",   isBool:false, color:"#4c9af0"},
-  {key:"builder",     label:"2.1 Builder Budget Pricing",group:"cost",     isBool:true,  color:"#b06cd0"},
-  {key:"commercial",  label:"2.2 Internal Commercial",   group:"cost",     isBool:true,  color:"#b06cd0"},
-  {key:"qsCert",      label:"3. QS Cost Certification",  group:"cost",     isBool:false, color:"#b06cd0"},
-  {key:"dovApproval", label:"3.1 Internal DoV Approval", group:"cost",     isBool:true,  color:"#b06cd0"},
-  {key:"dovIssue",    label:"4. DoV Issue (Vendor)",     group:"legal",    isBool:false, color:"#4caf82"},
-  {key:"dovDeadline", label:"5. Purchaser DoV Deadline", group:"legal",    isBool:false, color:"#4caf82"},
-  {key:"hickory",     label:"6. Instructed to Hickory",  group:"delivery", isBool:false, color:"#4ecece"},
-  {key:"planning",    label:"7. Planning Submission",    group:"delivery", isBool:false, color:"#4ecece"},
-  {key:"modApproval", label:"8. Modification Approval",  group:"delivery", isBool:false, color:"#4ecece"},
+  // Phase 1 — Design (SC 68 — 90-day window)
+  {key:"brief",             label:"1. Written Brief Due",                      group:"design",   isBool:false, color:"#4c9af0"},
+  {key:"sketch",            label:"1.1 Sketch Plan Issued",                    group:"design",   isBool:true,  color:"#4c9af0"},
+  {key:"layoutApproved",    label:"1.2 Layout Confirmed — Letter Countersigned",group:"design",  isBool:true,  color:"#4c9af0"},
+  {key:"costsIssued",       label:"1.3 Cost Ranges Issued to Purchaser",       group:"design",   isBool:true,  color:"#4c9af0"},
+  {key:"feasibility",       label:"1.4 Interiors & Finishes Confirmed",        group:"design",   isBool:true,  color:"#4c9af0"},
+  {key:"cad",               label:"1.5 FJC CAD Plans Issued for Pricing",      group:"design",   isBool:true,  color:"#4c9af0"},
+  {key:"qsEst",             label:"1.6 Final Pricing Issued to Purchaser",     group:"design",   isBool:true,  color:"#4c9af0"},
+  {key:"confirm",           label:"1.7 Purchaser Confirms Final Pricing",      group:"design",   isBool:true,  color:"#4c9af0"},
+  {key:"designEnd",         label:"1.8 Design Period End",                     group:"design",   isBool:false, color:"#4c9af0"},
+  // Phase 2 — Cost
+  {key:"builder",           label:"2.1 Builder Budget Pricing",                group:"cost",     isBool:true,  color:"#b06cd0"},
+  {key:"commercial",        label:"2.2 Internal Commercial Review",            group:"cost",     isBool:true,  color:"#b06cd0"},
+  {key:"qsCert",            label:"2.3 QS Cost Certification",                 group:"cost",     isBool:false, color:"#b06cd0"},
+  // Phase 3 — Legal
+  {key:"dovApproval",       label:"3.1 Internal DoV Approval",                 group:"legal",    isBool:true,  color:"#4caf82"},
+  {key:"dovIssue",          label:"3.2 DoV Issued to Purchaser",               group:"legal",    isBool:false, color:"#4caf82"},
+  {key:"dovDeadline",       label:"3.3 Purchaser Executes DoV",                group:"legal",    isBool:false, color:"#4caf82"},
+  {key:"depositPaid",       label:"3.4 Deposit Top-Up Paid",                   group:"legal",    isBool:true,  color:"#4caf82"},
+  // Phase 4 — Delivery
+  {key:"hickory",           label:"4.1 Instructed to Hickory",                 group:"delivery", isBool:false, color:"#4ecece"},
+  {key:"planning",          label:"4.2 Planning Submission",                   group:"delivery", isBool:false, color:"#4ecece"},
+  {key:"modApproval",       label:"4.3 Modification Approval",                 group:"delivery", isBool:false, color:"#4ecece"},
 ];
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
@@ -318,21 +326,25 @@ function fmtP(p){ return p ? "$"+(p/1e6).toFixed(2)+"M" : "—"; }
 function bicCol(b){ return BIC_COL[b]||"#888"; }
 
 function getStage(u){
-  if(u.qsEst)        return {label:"QS Estimate Issued",         pct:65, color:"#4caf82"};
-  if(u.cad)          return {label:"CAD Plans Issued",            pct:50, color:"#4caf82"};
-  if(u.feasibility)  return {label:"Feasibility Complete",        pct:35, color:"#c9a84c"};
-  if(u.sketch)       return {label:"Sketch Issued",               pct:25, color:"#c9a84c"};
-  if(u.brief && pd(u.brief)<=TODAY) return {label:"Brief Due — Sketch Pending", pct:10, color:"#e06060"};
-  if(u.brief)        return {label:"Brief Pending",               pct:5,  color:"#555"};
-  return               {label:"Not Started",                      pct:0,  color:"#7a736a"};
+  if(u.confirm)      return {label:"1.7 Purchaser Confirms Final Pricing",  pct:85, color:"#4caf82"};
+  if(u.qsEst)        return {label:"1.6 Final Pricing Issued",              pct:72, color:"#4caf82"};
+  if(u.cad)          return {label:"1.5 CAD Plans Issued",                  pct:60, color:"#4caf82"};
+  if(u.feasibility)  return {label:"1.4 Interiors & Finishes Confirmed",    pct:48, color:"#c9a84c"};
+  if(u.costsIssued)  return {label:"1.3 Cost Ranges Issued",                pct:35, color:"#c9a84c"};
+  if(u.layoutApproved) return {label:"1.2 Layout Confirmed",                pct:25, color:"#c9a84c"};
+  if(u.sketch)       return {label:"1.1 Sketch Issued",                     pct:15, color:"#c9a84c"};
+  if(u.brief && pd(u.brief)<=TODAY) return {label:"Brief Due — Sketch Pending", pct:8, color:"#e06060"};
+  if(u.brief)        return {label:"Brief Pending",                          pct:3,  color:"#555"};
+  return               {label:"Not Started",                                 pct:0,  color:"#7a736a"};
 }
 
 // ─── MINI COMPONENTS ────────────────────────────────────────────────────────
 function BicBadge(props){
   if(!props.bic) return h("span",{style:{color:"#aaa49c",fontSize:11}},"—");
   var c=bicCol(props.bic);
+  var label=props.full ? (props.bic+" — "+(BIC_NAME[props.bic]||props.bic)) : props.bic;
   return h("span",{style:{display:"inline-block",padding:"2px 8px",borderRadius:2,fontSize:11,fontWeight:600,
-    background:c+"20",color:c,border:"1px solid "+c+"40",letterSpacing:"0.04em"}},props.bic);
+    background:c+"20",color:c,border:"1px solid "+c+"40",letterSpacing:"0.04em"}},label);
 }
 function SBadge(props){
   var ex=props.s==="EXCHANGED";
@@ -390,15 +402,19 @@ function UnitModal(props){
 
   // Mini timeline — horizontal dots
   var timelineSteps = [
-    {l:"Brief",    done: !!u.brief && pd(u.brief)<=TODAY},
-    {l:"Sketch",   done: u.sketch},
-    {l:"Feasibility", done: u.feasibility},
-    {l:"CAD",      done: u.cad},
-    {l:"QS Est",   done: u.qsEst},
+    {l:"Brief",      done: !!u.brief && pd(u.brief)<=TODAY},
+    {l:"Sketch",     done: u.sketch},
+    {l:"Layout",     done: u.layoutApproved},
+    {l:"Costs",      done: u.costsIssued},
+    {l:"Finishes",   done: u.feasibility},
+    {l:"CAD",        done: u.cad},
+    {l:"Pricing",    done: u.qsEst},
+    {l:"Confirmed",  done: u.confirm},
     {l:"Design End", done: u.designEnd && pd(u.designEnd)<=TODAY},
-    {l:"QS Cert",  done: u.qsCert && pd(u.qsCert)<=TODAY},
-    {l:"DoV Issue",done: u.dovIssue && pd(u.dovIssue)<=TODAY},
-    {l:"DoV Sign", done: u.dovDeadline && pd(u.dovDeadline)<=TODAY},
+    {l:"QS Cert",    done: u.qsCert && pd(u.qsCert)<=TODAY},
+    {l:"DoV Issued", done: u.dovIssue && pd(u.dovIssue)<=TODAY},
+    {l:"DoV Signed", done: u.dovDeadline && pd(u.dovDeadline)<=TODAY},
+    {l:"Deposit",    done: u.depositPaid},
   ];
   var lastDone = -1;
   timelineSteps.forEach(function(s,i){ if(s.done) lastDone=i; });
@@ -649,7 +665,7 @@ function OverviewTab(){
             var items=bicGroups[bic], c=bicCol(bic);
             return h("div",{key:bic},
               h("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:6}},
-                h(BicBadge,{bic:bic}),
+                h(BicBadge,{bic:bic,full:true}),
                 h("span",{style:{fontSize:11,color:"#555"}},items.length+" unit"+(items.length>1?"s":""))
               ),
               h("div",{style:{display:"flex",flexWrap:"wrap",gap:5}},
@@ -878,7 +894,7 @@ function UnitsTab(props){
                 var style;
                 if(s.startsWith("1.")&&!s.startsWith("1.1"))
                   style={background:"#fdf0f0",color:"#c94040",border:"1px solid #f5b8b8"};
-                else if(s.startsWith("1.1"))
+                else if(s.startsWith("1."))
                   style={background:"#fdf8ee",color:"#b07a20",border:"1px solid #e8d89a"};
                 else if(s.startsWith("2."))
                   style={background:"#eef5fd",color:"#3a7acc",border:"1px solid #b8d4f8"};
@@ -924,7 +940,7 @@ function UnitsTab(props){
           return h("div",{key:bic,style:{background:"#ffffff",border:"1px solid #e0dbd2",
             borderLeft:"3px solid "+c,borderRadius:"0 4px 4px 0",padding:16}},
             h("div",{style:{display:"flex",alignItems:"center",gap:10,marginBottom:12}},
-              h(BicBadge,{bic:bic}),
+              h(BicBadge,{bic:bic,full:true}),
               h("span",{style:{fontSize:11,color:"#555"}},items.length+" action"+(items.length>1?"s":""))
             ),
             h("div",{style:{display:"flex",flexDirection:"column",gap:8}},
@@ -958,6 +974,77 @@ function UnitsTab(props){
   );
 }
 
+// ─── PHASES TAB ──────────────────────────────────────────────────────────────
+function PhasesTab(){
+  var PHASES = [
+    {color:"#4c9af0",phase:"Phase 1 — Design",steps:"SC 68 — 90-day window",milestones:[
+      {n:"1.",  contract:true, label:"Written Brief Due",                           clause:"SC 68(b)(ii)(A)",    timing:"Within 20 business days of contract date", desc:"Purchaser submits written brief outlining requested bespoke changes to the vendor."},
+      {n:"1.1", contract:false,label:"Sketch Plan Issued",                          clause:"Gurner Short Form — Phase 1", timing:"Week 1", desc:"Design team prepares sketch plan. Buildability reviewed by GURNER™ team."},
+      {n:"1.2", contract:false,label:"Layout Confirmed — Letter Countersigned",     clause:"Gurner Short Form — Phase 2", timing:"Week 2", desc:"Purchaser countersigns letter confirming layout is approved. No further layout changes accepted after this point."},
+      {n:"1.3", contract:false,label:"Cost Ranges Issued to Purchaser",             clause:"Gurner Short Form — Phase 3", timing:"Week 2–4", desc:"Preliminary cost ranges for the bespoke design issued to purchaser for review and sign off before full design commences."},
+      {n:"1.4", contract:false,label:"Interiors & Finishes Confirmed by Purchaser", clause:"Gurner Short Form — Phase 4", timing:"Week 4–8", desc:"Finishes and bespoke drawings prepared. Purchaser confirms indicative costing of interiors and selections."},
+      {n:"1.5", contract:false,label:"FJC CAD Plans Issued for Pricing",            clause:"Gurner Short Form — Phase 4/5", timing:"Week 4–8", desc:"Architect issues CAD plans incorporating agreed bespoke works for QS pricing."},
+      {n:"1.6", contract:false,label:"Final Pricing Issued to Purchaser",           clause:"Gurner Short Form — Phase 5", timing:"Week 8–12", desc:"Final cost issued to purchaser. Final refinements based on costing resolved."},
+      {n:"1.7", contract:false,label:"Purchaser Confirms Final Pricing",            clause:"Gurner Short Form — Phase 5", timing:"Week 8–12", desc:"Purchaser confirms intent to proceed based on final pricing."},
+      {n:"1.8", contract:true, label:"Design Period End",                           clause:"SC 68(b)(ii)(D)",    timing:"3 months from contract date", desc:"End of the 90-day bespoke design period. Vendor may determine amendments unilaterally if no agreement reached by this date (SC 68(b)(ii)(F))."},
+    ]},
+    {color:"#b06cd0",phase:"Phase 2 — Cost",steps:"Post design agreement (~3 months)",milestones:[
+      {n:"2.1", contract:false,label:"Builder Budget Pricing",                      clause:"Gurner Internal",   timing:"Post design agreement", desc:"Builder provides budget variation pricing and constructability input."},
+      {n:"2.2", contract:false,label:"Internal Commercial Review",                  clause:"Gurner Internal",   timing:"Prior to QS certification", desc:"Internal Gurner confirmation of cost build-up and margin alignment."},
+      {n:"2.3", contract:true, label:"QS Cost Certification",                       clause:"SC 68(b)(ii)(G)",   timing:"After design agreed", desc:"Vendor instructs a Quantity Surveyor to certify the cost impact of the agreed bespoke design changes. The QS determination is conclusive evidence of the Certified Variation Amount (SC 68(b)(ii)(H))."},
+    ]},
+    {color:"#4caf82",phase:"Phase 3 — Legal (DoV)",steps:"Deed of Variation execution",milestones:[
+      {n:"3.1", contract:false,label:"Internal DoV Approval",                       clause:"Gurner Internal",   timing:"After QS certification", desc:"Internal Gurner sign-off prior to issuing Deed of Variation. Gurner initials each page before issue."},
+      {n:"3.2", contract:true, label:"DoV Issued to Purchaser",                     clause:"SC 68(b)(ii)(J)",   timing:"After QS certification", desc:"Vendor drafts and issues Deed of Variation formally documenting agreed bespoke works, amended plans and specifications, and price adjustment."},
+      {n:"3.3", contract:true, label:"Purchaser Executes DoV",                      clause:"SC 68(b)(ii)(K)",   timing:"Within 14 days of issue, or Date for Completion (whichever earlier)", desc:"Purchaser must execute the Deed of Variation within 14 days. Note: contract is automatically amended under SC 68(c) regardless of whether the purchaser executes the DoV."},
+      {n:"3.4", contract:true, label:"Deposit Top-Up Paid",                         clause:"SC 68(b)(ii)(L)",   timing:"Within 10 business days of DoV date, or Date for Completion (whichever earlier)", desc:"Deposit amended to 10% of revised price. Purchaser pays outstanding balance — or vendor refunds overpayment if price decreased — within 10 business days of the Deed of Variation date."},
+    ]},
+    {color:"#4ecece",phase:"Phase 4 — Delivery",steps:"Construction & planning approvals",milestones:[
+      {n:"4.1", contract:true, label:"Instructed to Hickory",                       clause:"Internal programme", timing:"Post DoV execution", desc:"Builder instructed to proceed with bespoke works."},
+      {n:"4.2", contract:true, label:"Planning / DA Modification Submission",       clause:"Internal programme", timing:"Upon DoV execution", desc:"Recommended latest date to submit planning modification application to the relevant Consent Authority."},
+      {n:"4.3", contract:true, label:"Modification Approval",                       clause:"Clause 33.1 / SC 68(e)", timing:"Fixed contractual sunset date", desc:"Deadline by which s.4.55 DA modification approval must be obtained. Delivery of consolidated/customised lot is conditional on this approval (SC 68(e))."},
+    ]},
+  ];
+
+  return h("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,alignItems:"start"}},
+    PHASES.map(function(phase){
+      return h("div",{key:phase.phase,
+        style:{border:"1px solid "+phase.color+"33",borderTop:"3px solid "+phase.color,
+          borderRadius:"0 0 4px 4px",background:"#ffffff",overflow:"hidden"}},
+        h("div",{style:{padding:"10px 12px",background:phase.color+"08",borderBottom:"1px solid "+phase.color+"22"}},
+          h("div",{style:{display:"flex",alignItems:"center",gap:6,marginBottom:3}},
+            h("div",{style:{width:9,height:9,borderRadius:"50%",background:phase.color,flexShrink:0}}),
+            h("span",{style:{fontSize:13,fontWeight:600,color:"#2a2520"}},phase.phase)
+          ),
+          h("div",{style:{fontSize:9,color:phase.color,letterSpacing:"0.07em",textTransform:"uppercase",paddingLeft:15}},phase.steps)
+        ),
+        phase.milestones.map(function(m){
+          return h("div",{key:m.n,
+            style:{padding:"8px 12px",borderBottom:"1px solid #f5f3ef",
+              borderLeft:"3px solid "+(m.contract?phase.color:phase.color+"44"),
+              background:m.contract?"#ffffff":"#fdfcfb"}},
+            h("div",{style:{display:"flex",alignItems:"baseline",gap:6,marginBottom:3}},
+              h("span",{style:{fontSize:10,fontWeight:700,color:phase.color,minWidth:26,flexShrink:0}},m.n),
+              h("span",{style:{fontSize:11,color:"#2a2520",fontWeight:m.contract?600:400,flex:1,lineHeight:1.3}},m.label),
+              h("span",{style:{fontSize:8,color:"#bbb5ad",flexShrink:0,whiteSpace:"nowrap"}},m.clause)
+            ),
+            h("div",{style:{paddingLeft:32}},
+              h("div",{style:{fontSize:10,color:"#6a6058",lineHeight:1.5,marginBottom:3}},m.desc),
+              h("div",{style:{fontSize:9,color:phase.color+"bb",letterSpacing:"0.03em"}},"⏱ "+m.timing)
+            )
+          );
+        }),
+        // Contract note at bottom
+        h("div",{style:{padding:"6px 12px",background:"#f9f8f6",borderTop:"1px solid #ebe7e0"}},
+          h("div",{style:{fontSize:8,color:"#9a9490",letterSpacing:"0.04em"}},
+            "█ Contractual milestone  ░ Gurner internal step"
+          )
+        )
+      );
+    })
+  );
+}
+
 // ─── GANTT TAB ───────────────────────────────────────────────────────────────
 function GanttTab(props){
   var onOpen = props.onOpen;
@@ -978,28 +1065,32 @@ function GanttTab(props){
     delivery: "#4ecece",
   };
   var CONTRACT_STEPS = [
-    { key:"brief",       label:"1. Brief Due",          short:"Brief",    color:"#4c9af0",  phase:"design"   },
-    { key:"designEnd",   label:"2. Design End",          short:"Design End",color:"#4c9af0", phase:"design"   },
-    { key:"qsCert",      label:"3. QS Certification",    short:"QS Cert",  color:"#b06cd0",  phase:"cost"     },
-    { key:"dovIssue",    label:"4. DoV Issue",           short:"DoV Issue",color:"#4caf82",  phase:"legal"    },
-    { key:"dovDeadline", label:"5. DoV Deadline",        short:"DoV Sign", color:"#4caf82",  phase:"legal"    },
-    { key:"hickory",     label:"6. To Hickory",          short:"Hickory",  color:"#4ecece",  phase:"delivery" },
-    { key:"planning",    label:"7. Planning",            short:"Planning", color:"#4ecece",  phase:"delivery" },
-    { key:"modApproval", label:"8. Mod Approval",        short:"Mod App",  color:"#4ecece",  phase:"delivery" },
+    { key:"exchanged",   label:"Contract Exchanged",      short:"Exchanged", color:"#4c9af0",  phase:"design"   },
+    { key:"brief",       label:"1. Brief Due",            short:"Brief",     color:"#4c9af0",  phase:"design",   noTick:true },
+    { key:"designEnd",   label:"1.8 Design Period End",   short:"Design End",color:"#4c9af0",  phase:"design"   },
+    { key:"qsCert",      label:"2.3 QS Certification",   short:"QS Cert",   color:"#b06cd0",  phase:"cost"     },
+    { key:"dovIssue",    label:"3.2 DoV Issued",          short:"DoV Issue", color:"#4caf82",  phase:"legal",    noTick:true },
+    { key:"dovDeadline", label:"3.3 DoV Executed",        short:"DoV Sign",  color:"#4caf82",  phase:"legal"    },
+    { key:"modApproval", label:"4.3 Mod Approval",        short:"Mod App",   color:"#4ecece",  phase:"delivery" },
   ];
 
-  // In-between tracking steps — boolean yes/no, shown as YELLOW in tracker
-  // Grouped by which contractual milestone they lead into
+  // Tracking steps (boolean) — shown as diamonds between contractual milestones
+  // purchaser:true = purchaser-facing sign-off (filled diamond when done)
+  // purchaser:false = internal Gurner activity (outline diamond when done)
   var YELLOW_STEPS = [
-    { key:"sketch",         label:"1.1 Sketch Issued",                          leadsTo:"designEnd",  color:"#4c9af0",  phase:"design" },
-    { key:"layoutApproved", label:"1.2 Letter Countersigned — Layout Approved", leadsTo:"designEnd",  color:"#4c9af0",  phase:"design" },
-    { key:"feasibility",    label:"1.3 FJC Feasibility Review",                 leadsTo:"designEnd",  color:"#4c9af0",  phase:"design" },
-    { key:"cad",            label:"1.4 FJC CAD Plans",                          leadsTo:"designEnd",  color:"#4c9af0",  phase:"design" },
-    { key:"qsEst",          label:"1.5 QS Estimate Issued",                     leadsTo:"designEnd",  color:"#4c9af0",  phase:"design" },
-    { key:"confirm",        label:"1.6 Purchaser Confirmation",                 leadsTo:"designEnd",  color:"#4c9af0",  phase:"design" },
-    { key:"builder",     label:"2.1 Builder Budget Pricing",     leadsTo:"qsCert",     color:"#b06cd0",  phase:"cost"   },
-    { key:"commercial",  label:"2.2 Internal Commercial Review", leadsTo:"qsCert",     color:"#b06cd0",  phase:"cost"   },
-    { key:"dovApproval", label:"3.1 Internal DoV Approval",      leadsTo:"dovIssue",   color:"#4caf82",  phase:"legal"  },
+    { key:"sketch",         label:"1.1 Sketch Plan Issued",                          leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
+    { key:"layoutApproved", label:"1.2 Layout Confirmed — Letter Countersigned",     leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true  },
+    { key:"costsIssued",    label:"1.3 Cost Ranges Issued to Purchaser",             leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true  },
+    { key:"feasibility",    label:"1.4 Interiors & Finishes Confirmed by Purchaser", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true  },
+    { key:"cad",            label:"1.5 FJC CAD Plans Issued for Pricing",            leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
+    { key:"qsEst",          label:"1.6 Final Pricing Issued to Purchaser",           leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
+    { key:"confirm",        label:"1.7 Purchaser Confirms Final Pricing",            leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true  },
+    { key:"builder",        label:"2.1 Builder Budget Pricing",                      leadsTo:"qsCert",    color:"#b06cd0", phase:"cost",   purchaser:false },
+    { key:"commercial",     label:"2.2 Internal Commercial Review",                  leadsTo:"qsCert",    color:"#b06cd0", phase:"cost",   purchaser:false },
+    { key:"dovApproval",    label:"3.1 Internal DoV Approval",                       leadsTo:"dovIssue",  color:"#4caf82", phase:"legal",    purchaser:false },
+    { key:"depositPaid",    label:"3.4 Deposit Top-Up Paid",                         leadsTo:"dovDeadline",color:"#4caf82",phase:"legal",    purchaser:true  },
+    { key:"hickory",        label:"4.1 Instructed to Hickory",                       leadsTo:"modApproval",color:"#1a9999",phase:"delivery", purchaser:false, dateOnly:true },
+    { key:"planning",       label:"4.2 DA Modification Submission",                  leadsTo:"modApproval",color:"#1a9999",phase:"delivery", purchaser:false, dateOnly:true },
   ];
 
   var ganttUnits = UNITS.filter(function(u){
@@ -1010,20 +1101,37 @@ function GanttTab(props){
     return new Date(a.exchanged||a.brief||"2027-01-01") - new Date(b.exchanged||b.brief||"2027-01-01");
   });
 
-  // Date range — exclude far-future mod approvals (2028)
-  var allD = [];
-  ganttUnits.forEach(function(u){
-    [u.exchanged,u.brief,u.designEnd,u.qsCert,u.dovDeadline,u.hickory].forEach(function(d){
-      if(d) allD.push(new Date(d));
-    });
-  });
-  allD.push(TODAY);
-  var minD = new Date(Math.min.apply(null,allD)); minD.setDate(minD.getDate()-20);
-  var maxD = new Date(Math.max.apply(null,allD)); maxD.setDate(maxD.getDate()+45);
-  var totalDays = Math.round((maxD-minD)/86400000);
-  var DPX = 2.8; // pixels per day
-  var W = totalDays * DPX;
+  var LABEL_W = 270;
+  var ROW_H   = 64;
+
+  // Fixed timeline: 1 Oct 2025 → 30 Sep 2026
+  var minD = new Date("2025-09-30");
+  var maxD = new Date("2026-09-30");
+  var totalDays = Math.round((maxD - minD) / 86400000);
+  // Responsive: fill available screen width
+  var CHART_W = Math.max(900, window.innerWidth - LABEL_W - 56);
+  var DPX = CHART_W / totalDays;
+  var W = CHART_W;
   var todayX = Math.round((TODAY-minD)/86400000)*DPX;
+
+  // Phase boundary medians for phase header bands
+  function medianDate(arr){
+    if(!arr.length) return null;
+    arr.sort(function(a,b){return a-b;});
+    var m=Math.floor(arr.length/2);
+    return arr.length%2 ? arr[m] : new Date((arr[m-1].getTime()+arr[m].getTime())/2);
+  }
+  var pb = {};
+  ["brief","designEnd","qsCert","dovDeadline","modApproval"].forEach(function(k){
+    var dates=ganttUnits.map(function(u){return u[k];}).filter(function(d){return d&&d<"2027-01-01";}).map(function(d){return new Date(d);});
+    pb[k]=medianDate(dates);
+  });
+  if(!pb.brief) pb.brief=minD;
+  if(!pb.designEnd) pb.designEnd=new Date(pb.brief.getTime()+90*86400000);
+  if(!pb.qsCert)    pb.qsCert=new Date(pb.designEnd.getTime()+90*86400000);
+  if(!pb.dovDeadline) pb.dovDeadline=new Date(pb.qsCert.getTime()+60*86400000);
+  if(!pb.modApproval) pb.modApproval=maxD;
+  function pbx(k){ return Math.max(0, Math.round((pb[k]-minD)/86400000)*DPX); }
 
   // Month headers
   var months = [];
@@ -1037,15 +1145,12 @@ function GanttTab(props){
   function xp(d){ return d ? Math.round((new Date(d)-minD)/86400000)*DPX : null; }
   function fmt2(d){ return d ? new Date(d).toLocaleDateString("en-AU",{day:"2-digit",month:"short"}) : "—"; }
 
-  var LABEL_W = 230;
-  var ROW_H = 52;
-
   return h("div", {style:{background:"#ffffff",border:"1px solid #e0dbd2",borderRadius:4,padding:20}},
 
     // Header
     h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}},
       h("div",{style:{fontFamily:"'Playfair Display',serif",fontSize:15,color:"#1a1714"}},
-        "Design Programme — All Units"),
+        "Customisation Programme — All Units"),
       h("label",{style:{display:"flex",alignItems:"center",gap:6,fontSize:11,color:"#555",cursor:"pointer"}},
         h("input",{type:"checkbox",checked:showIssued,
           onChange:function(e){setShowIssued(e.target.checked);},
@@ -1053,102 +1158,54 @@ function GanttTab(props){
         "Include Issued units")
     ),
 
-    // Phase legend cards — expandable
-    h("div",{style:{marginBottom:20}},
-      h("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:12}},
-        [
-          {color:"#4c9af0",phase:"Design Phase",steps:"Steps 1 & 2",milestones:[
-            {n:"1.", contract:true, label:"Written Brief Due / Design Briefing Session", clause:"SC 67.2/68.2", timing:"20 business days", desc:"Purchaser submits written brief outlining requested bespoke changes."},
-            {n:"1.1",contract:false,label:"Sketch Plan Issued",                        clause:"Framework",      timing:"Immediately after brief",   desc:"Prepared with purchaser by the design team via Zoom/Teams."},
-            {n:"1.2",contract:false,label:"Letter Countersigned — Layout Approved",  clause:"Framework",      timing:"After sketch issued",       desc:"Purchaser countersigns letter confirming layout is approved before design proceeds."},
-            {n:"1.3",contract:false,label:"Cost Ranges Issued to Purchaser for Sign Off", clause:"Framework", timing:"After layout approved",     desc:"Preliminary cost ranges for the bespoke design are issued to the purchaser for review and sign off before full design commences."},
-            {n:"1.4",contract:false,label:"FJC Feasibility Review",                  clause:"Framework",      timing:"After cost sign off",       desc:"Internal review with builder and consultants to confirm feasibility."},
-            {n:"1.5",contract:false,label:"FJC CAD Plans",                           clause:"Framework",      timing:"After consultant review",   desc:"Architect issues CAD plan for QS pricing."},
-            {n:"1.6",contract:false,label:"QS Estimate Issued",                      clause:"Framework",      timing:"During design period",      desc:"QS issues non-binding estimate including preliminaries and margins."},
-            {n:"1.7",contract:false,label:"Purchaser Confirmation",                  clause:"Framework",      timing:"After QS estimate",         desc:"Purchaser confirms intent to proceed based on estimate."},
-            {n:"2.", contract:true, label:"Design Period End",        clause:"SC 67.3/68.3",   timing:"3 months",                 desc:"End of the bespoke design collaboration period."},
-          ]},
-          {color:"#b06cd0",phase:"Cost Phase",steps:"Step 3",milestones:[
-            {n:"2.1",contract:false,label:"Builder Budget Pricing",     clause:"Framework",     timing:"Post design agreement",     desc:"Builder provides budget variation pricing and constructability input."},
-            {n:"2.2",contract:false,label:"Internal Commercial Review", clause:"Framework",     timing:"Prior to QS certification", desc:"Internal confirmation of cost build-up and margin alignment."},
-            {n:"3.", contract:true, label:"QS Cost Certification",      clause:"SC 67.5/68.5",  timing:"~3 months after design",    desc:"Vendor instructs QS to certify the cost impact of agreed bespoke works."},
-            {n:"3.1",contract:false,label:"Internal DoV Approval",      clause:"Framework",     timing:"After QS certification",    desc:"Development and commercial approval prior to issuing Deed of Variation."},
-          ]},
-          {color:"#4caf82",phase:"Legal Phase",steps:"Steps 4 & 5",milestones:[
-            {n:"4.", contract:true, label:"DoV Issue (Vendor)",      clause:"SC 67.6/68.6",  timing:"After QS certification",   desc:"Vendor issues the Deed of Variation formally documenting the agreed bespoke works."},
-            {n:"5.", contract:true, label:"Purchaser DoV Deadline",  clause:"SC 67.6/68.6",  timing:"14 days after DoV issued", desc:"Contractual deadline by which purchaser must execute the Deed of Variation."},
-          ]},
-          {color:"#4ecece",phase:"Delivery Phase",steps:"Steps 6-8",milestones:[
-            {n:"6.", contract:true, label:"Instructed to Hickory",  clause:"Internal",           timing:"DoV execution date",    desc:"Builder instructed to proceed with bespoke works."},
-            {n:"7.", contract:true, label:"Planning Submission",    clause:"Internal programme", timing:"Upon DoV execution",    desc:"Recommended latest date to submit planning modification application."},
-            {n:"8.", contract:true, label:"Modification Approval",  clause:"Clause 33.1",        timing:"Fixed sunset date",     desc:"Contractual deadline by which planning modification approval must be obtained."},
-          ]},
-        ].map(function(phase){
-          var stExp=useState(true); var exp=stExp[0],setExp=stExp[1];
-          return h("div",{key:phase.phase,
-            style:{border:"1px solid "+phase.color+"33",borderTop:"3px solid "+phase.color,
-              borderRadius:"0 0 4px 4px",background:"#ffffff",overflow:"hidden"}},
-            h("div",{onClick:function(){setExp(!exp);},
-              style:{padding:"10px 12px",cursor:"pointer",display:"flex",
-                justifyContent:"space-between",alignItems:"center",
-                background:phase.color+"08",userSelect:"none"}},
-              h("div",null,
-                h("div",{style:{display:"flex",alignItems:"center",gap:6,marginBottom:2}},
-                  h("div",{style:{width:8,height:8,borderRadius:"50%",background:phase.color,flexShrink:0}}),
-                  h("span",{style:{fontSize:12,fontWeight:500,color:"#2a2520"}},phase.phase)
-                ),
-                h("div",{style:{fontSize:9,color:phase.color,letterSpacing:"0.07em",
-                  textTransform:"uppercase",paddingLeft:14}},phase.steps)
-              ),
-              h("span",{style:{fontSize:12,color:phase.color+"99",lineHeight:1,
-                display:"inline-block",transform:exp?"rotate(180deg)":"rotate(0deg)",
-                transition:"transform 0.2s"}},"▾")
-            ),
-            exp && h("div",{style:{borderTop:"1px solid "+phase.color+"22"}},
-              phase.milestones.map(function(m){
-                return h("div",{key:m.n,
-                  style:{padding:"7px 12px",borderBottom:"1px solid #f5f3ef",
-                    borderLeft:"3px solid "+(m.contract?phase.color:phase.color+"44"),
-                    background:m.contract?"#ffffff":"#fdfcfb"}},
-                  h("div",{style:{display:"flex",alignItems:"baseline",gap:6,marginBottom:2}},
-                    h("span",{style:{fontSize:10,fontWeight:600,color:phase.color,minWidth:24,flexShrink:0}},m.n),
-                    h("span",{style:{fontSize:11,color:"#2a2520",fontWeight:m.contract?500:400,flex:1}},m.label),
-                    h("span",{style:{fontSize:9,color:"#bbb5ad",flexShrink:0}},m.clause)
-                  ),
-                  h("div",{style:{paddingLeft:30}},
-                    h("div",{style:{fontSize:10,color:"#6a6058",lineHeight:1.5,marginBottom:2}},m.desc),
-                    h("div",{style:{fontSize:9,color:phase.color+"99",letterSpacing:"0.03em"}},"⏱ "+m.timing)
-                  )
-                );
-              })
-            )
-          );
-        })
-      ),
-      // Symbol legend bar
-      h("div",{style:{display:"flex",gap:16,flexWrap:"wrap",alignItems:"center",
-        padding:"7px 12px",background:"#f9f8f6",borderRadius:3,border:"1px solid #ebe7e0"}},
-        h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
-          h("div",{style:{width:1,height:13,background:"#888"}}),
-          h("span",null,"Contractual milestone")),
-        h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
-          h("div",{style:{width:9,height:9,background:"#888",transform:"rotate(45deg)",flexShrink:0}}),
-          h("span",null,"Tracking step — complete")),
-        h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
-          h("div",{style:{width:9,height:9,border:"2px solid #bbb5ad",transform:"rotate(45deg)",flexShrink:0,background:"transparent"}}),
-          h("span",null,"Tracking step — pending")),
-        h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
-          h("div",{style:{width:2,height:13,background:"#e06060"}}),
-          h("span",null,"Today")),
-        h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
-          h("button",{style:{background:"#f0ede8",border:"1px solid #d5d0c8",color:"#7a736a",
-            borderRadius:2,width:18,height:18,fontSize:10,cursor:"default",lineHeight:1}},"⊕"),
-          h("span",null,"Full unit detail"))
-      )
+    // Phase summary strip
+    h("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:14}},
+      [
+        {color:"#4c9af0",n:"1",label:"Design Phase",  sub:"SC 68 — 90-day window",      steps:"Brief → Sketch → Layout → Cost Ranges → Finishes → CAD → Pricing → Confirm → Design End"},
+        {color:"#b06cd0",n:"2",label:"Cost Phase",    sub:"Target — 3 Months", steps:"Builder Pricing → Commercial Review → QS Certification"},
+        {color:"#4caf82",n:"3",label:"DoV Phase",     sub:"Deed of Variation execution", steps:"Internal Approval → DoV Issued → Purchaser Executes → Deposit Top-Up"},
+        {color:"#4ecece",n:"4",label:"Delivery",      sub:"Construction & planning",     steps:"Instructed to Hickory → DA Modification Submission → Modification Approval"},
+      ].map(function(ph){
+        return h("div",{key:ph.n,style:{
+          borderTop:"3px solid "+ph.color,
+          border:"1px solid "+ph.color+"33",borderTopWidth:3,borderTopStyle:"solid",borderTopColor:ph.color,
+          borderRadius:"0 0 3px 3px",background:"#fff",padding:"8px 10px"}},
+          h("div",{style:{display:"flex",alignItems:"center",gap:5,marginBottom:2}},
+            h("div",{style:{width:7,height:7,borderRadius:"50%",background:ph.color,flexShrink:0}}),
+            h("span",{style:{fontSize:11,fontWeight:600,color:"#2a2520"}},(ph.n+" — "+ph.label))
+          ),
+          h("div",{style:{fontSize:8,color:ph.color,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:4}},ph.sub),
+          h("div",{style:{fontSize:9,color:"#7a736a",lineHeight:1.5}},ph.steps)
+        );
+      })
+    ),
+
+    // Symbol legend bar
+    h("div",{style:{display:"flex",gap:16,flexWrap:"wrap",alignItems:"center",
+      padding:"7px 12px",marginBottom:12,background:"#f9f8f6",borderRadius:3,border:"1px solid #ebe7e0"}},
+      h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
+        h("div",{style:{width:1,height:13,background:"#888"}}),
+        h("span",null,"Contractual milestone")),
+      h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
+        h("div",{style:{width:9,height:9,background:"#888",transform:"rotate(45deg)",flexShrink:0}}),
+        h("span",null,"Tracking step — complete")),
+      h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
+        h("div",{style:{width:9,height:9,border:"2px solid #bbb5ad",transform:"rotate(45deg)",flexShrink:0,background:"transparent"}}),
+        h("span",null,"Tracking step — pending")),
+      h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
+        h("div",{style:{width:13,height:13,border:"2px solid #bbb5ad",transform:"rotate(45deg)",flexShrink:0,background:"transparent"}}),
+        h("span",null,"Purchaser sign-off — pending")),
+      h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
+        h("div",{style:{width:2,height:13,background:"#e06060"}}),
+        h("span",null,"Today")),
+      h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
+        h("button",{style:{background:"#f0ede8",border:"1px solid #d5d0c8",color:"#7a736a",
+          borderRadius:2,width:18,height:18,fontSize:10,cursor:"default",lineHeight:1}},"⊕"),
+        h("span",null,"Full unit detail"))
     ),
 
     h("div",{style:{overflowX:"auto"}},
-      h("div",{style:{minWidth:(W+LABEL_W+8)+"px"}},
+      h("div",{style:{minWidth:(CHART_W+LABEL_W+8)+"px"}},
 
         // Month row
         h("div",{style:{marginLeft:LABEL_W+"px",position:"relative",height:20,
@@ -1168,11 +1225,11 @@ function GanttTab(props){
           // Override colour and label from curStatus so all units at the same stage look identical
           if(u.curStatus && !u.curStatus.startsWith("NA")){
             stage = {pct:stage.pct, label:u.curStatus,
-              color: u.curStatus.startsWith("1.")&&!u.curStatus.startsWith("1.1") ? "#e06060"
-                   : u.curStatus.startsWith("1.1") ? "#c9a84c"
-                   : u.curStatus.startsWith("2.")  ? "#4c9af0"
-                   : u.curStatus.startsWith("3.")  ? "#b06cd0"
-                   : (u.curStatus.startsWith("4.")||u.curStatus.startsWith("5.")) ? "#4caf82"
+              color: u.curStatus.startsWith("1.") && !u.curStatus.startsWith("1.1") ? "#e06060"
+                   : u.curStatus.startsWith("1.")  ? "#c9a84c"
+                   : u.curStatus.startsWith("2.")  ? "#b06cd0"
+                   : u.curStatus.startsWith("3.")  ? "#4caf82"
+                   : u.curStatus.startsWith("4.")  ? "#4ecece"
                    : stage.color};
           }
 
@@ -1186,6 +1243,28 @@ function GanttTab(props){
             var x = xp(u[cs.key]);
             if(x !== null) contractX[cs.key] = x;
           });
+          // Also populate delivery keys (moved to YELLOW_STEPS) for pinning block
+          ["hickory","planning"].forEach(function(k){
+            if(contractX[k] === undefined){ var x=xp(u[k]); if(x!==null) contractX[k]=x; }
+          });
+          // Pin phase boundaries so bands never overlap:
+          // Phase 1 (blue):  exchanged → exchanged+90d
+          // Phase 2 (purple): exchanged+90d → exchanged+180d
+          // Phase 3+ (green/teal): actual dates, but never before exchanged+180d
+          if(contractX["exchanged"] !== undefined){
+            var _b   = contractX["exchanged"];
+            var _s90 = Math.round(90*DPX);
+            contractX["designEnd"] = _b + _s90;
+            contractX["qsCert"]    = _b + 2*_s90;
+            var _floor = contractX["qsCert"];
+            var _minGap = Math.round(21*DPX); // at least 21 days between Phase 3/4 milestones
+            ["dovIssue","dovDeadline","hickory","planning","modApproval"].forEach(function(k){
+              if(contractX[k] !== undefined){
+                contractX[k] = Math.max(contractX[k], _floor);
+                _floor = contractX[k] + _minGap;
+              }
+            });
+          }
 
           // The "spine" bar — from exchanged to last milestone
           var spineStart = xp(u.exchanged || u.brief);
@@ -1203,35 +1282,67 @@ function GanttTab(props){
             : null;
 
           return h("div",{key:u.unit,
-            style:{display:"flex",alignItems:"center",marginBottom:4,
-              borderBottom:"1px solid #111",paddingBottom:4}},
+            style:{display:"flex",alignItems:"center",marginBottom:6,
+              borderBottom:"1px solid #e8e3da",paddingBottom:4,overflow:"visible"}},
 
             // LEFT LABEL
-            h("div",{style:{width:LABEL_W+"px",flexShrink:0,paddingRight:10,
-              display:"flex",alignItems:"center",gap:6}},
+            h("div",{style:{width:LABEL_W+"px",flexShrink:0,paddingRight:6,
+              display:"flex",alignItems:"center",gap:5}},
               h("button",{onClick:function(){onOpen(u);},
                 title:"Full detail",
                 style:{background:"#f0ede8",border:"1px solid #e0dbd2",color:"#6a6058",
                   borderRadius:2,cursor:"pointer",width:22,height:22,display:"flex",
                   alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0}},
                 "⊕"),
+              // Text block: unit/BIC/badge on row 1, name, stage (wrapping)
               h("div",{style:{flex:1,minWidth:0}},
-                // Unit + name
-                h("div",{style:{display:"flex",alignItems:"center",gap:6,marginBottom:2}},
-                  h("span",{style:{fontSize:12,color:"#c9a84c",fontWeight:500,
-                    letterSpacing:"0.03em",flexShrink:0}},u.unit),
-                  h(BicBadge,{bic:u.bic})
+                h("div",{style:{display:"flex",alignItems:"center",marginBottom:1}},
+                  // Fixed-width container so badge always aligns at the same x
+                  h("div",{style:{width:125,flexShrink:0,display:"flex",alignItems:"center",gap:5}},
+                    h("span",{style:{fontSize:12,color:"#c9a84c",fontWeight:500,
+                      letterSpacing:"0.03em",flexShrink:0}},u.unit),
+                    h(BicBadge,{bic:u.bic})
+                  ),
+                  // Overdue badge — always at same x position
+                  (function(){
+                    if(!u.exchanged) return null;
+                    var nextDue = null;
+                    if(!u.confirm){
+                      nextDue = new Date(u.exchanged);
+                    } else if(u.dovDeadline && !u.depositPaid){
+                      nextDue = new Date(u.dovDeadline);
+                    } else if(u.modApproval && u.modApproval!=="2028-06-30"){
+                      nextDue = new Date(u.modApproval);
+                    }
+                    if(!nextDue) return null;
+                    var dLeft = Math.round((nextDue-TODAY)/86400000);
+                    if(dLeft > 0 && dLeft < 30) return h("span",{style:{fontSize:8,padding:"1px 4px",borderRadius:2,
+                      flexShrink:0,
+                      background:dLeft<14?"#e0606022":"#4c9af015",
+                      color:dLeft<14?"#e06060":"#4c9af0",
+                      border:"1px solid "+(dLeft<14?"#e0606044":"#4c9af044"),
+                      whiteSpace:"nowrap"}},dLeft+"d left");
+                    if(dLeft <= 0) return h("span",{style:{fontSize:8,padding:"1px 4px",borderRadius:2,
+                      flexShrink:0,
+                      background:"#e0606022",color:"#e06060",border:"1px solid #e0606044",
+                      whiteSpace:"nowrap"}},Math.abs(dLeft)+"d overdue");
+                    return null;
+                  })()
                 ),
                 h("div",{style:{fontSize:9,color:"#7a736a",overflow:"hidden",
-                  textOverflow:"ellipsis",whiteSpace:"nowrap"}},u.name),
-                // Stage
-                h("div",{style:{fontSize:9,color:stage.color,letterSpacing:"0.04em",marginTop:1}},
-                  stage.label)
+                  textOverflow:"ellipsis",whiteSpace:"nowrap",marginBottom:1}},u.name),
+                h("div",{style:{fontSize:9,color:stage.color,letterSpacing:"0.03em",
+                  lineHeight:1.3,whiteSpace:"normal"}},
+                  stage.label.split(" / ").reduce(function(acc,part,i){
+                    if(i>0) acc.push(h("br",{key:"br"+i}));
+                    acc.push(part);
+                    return acc;
+                  },[]))
               )
             ),
 
             // CHART AREA
-            h("div",{style:{position:"relative",height:ROW_H+"px",flex:1}},
+            h("div",{style:{position:"relative",height:ROW_H+"px",flex:1,overflow:"visible"}},
 
               // Today line
               h("div",{style:{position:"absolute",left:todayX+"px",top:0,bottom:0,
@@ -1240,20 +1351,85 @@ function GanttTab(props){
               // Phase-coloured spine segments between contractual milestones
               (function(){
                 var segments = [
-                  { from:"brief", to:"designEnd",  color:"#4c9af0" },
-                  { from:"designEnd", to:"qsCert",  color:"#b06cd0" },
                   { from:"qsCert", to:"dovIssue",   color:"#4caf82" },
                   { from:"dovIssue", to:"dovDeadline", color:"#4caf82" },
                   { from:"dovDeadline", to:"hickory",  color:"#4ecece" },
                   { from:"hickory", to:"modApproval",  color:"#4ecece" },
                 ];
-                return segments.map(function(seg){
+                var result = segments.map(function(seg){
                   var x1 = contractX[seg.from], x2 = contractX[seg.to];
                   if(x1===undefined||x2===undefined) return null;
                   return h("div",{key:seg.from+seg.to,style:{position:"absolute",
                     left:x1+"px",width:(x2-x1)+"px",
                     top:"24px",height:2,background:seg.color+"33",zIndex:1}});
                 });
+                // Phase 1 spine: 90-day blue line from exchanged date
+                var p1x = contractX["exchanged"];
+                if(p1x !== undefined)
+                  result.push(h("div",{key:"phase1spine",style:{position:"absolute",
+                    left:p1x+"px",width:Math.round(90*DPX)+"px",
+                    top:"24px",height:2,background:"#4c9af044",zIndex:1}}));
+                // Phase 2 spine: 90-day purple line starting exactly where blue ends
+                if(p1x !== undefined)
+                  result.push(h("div",{key:"phase2spine",style:{position:"absolute",
+                    left:(p1x+Math.round(90*DPX))+"px",width:Math.round(90*DPX)+"px",
+                    top:"24px",height:2,background:"#b06cd044",zIndex:1}}));
+                return result;
+              })(),
+
+              // Phase 1: blue 90-day design window band (from exchange date)
+              (function(){
+                var bx = contractX["exchanged"];
+                if(bx === undefined) return null;
+                var w = Math.round(90*DPX);
+                return h("div",{style:{position:"absolute",
+                  left:bx+"px", width:w+"px",
+                  top:"8px", height:"32px",
+                  background:"#4c9af010",
+                  border:"1px solid #4c9af033",
+                  borderRadius:2, zIndex:0}});
+              })(),
+
+              // Phase 2: purple 90-day cost phase band — starts exactly where blue ends (exchanged+90d)
+              (function(){
+                var briefX = contractX["exchanged"];
+                if(briefX === undefined) return null;
+                var bx = briefX + Math.round(90*DPX);
+                var w = Math.round(90*DPX);
+                return h("div",{style:{position:"absolute",
+                  left:bx+"px", width:w+"px",
+                  top:"8px", height:"32px",
+                  background:"#b06cd010",
+                  border:"1px solid #b06cd033",
+                  borderRadius:2, zIndex:0}});
+              })(),
+
+              // Phase 3: green DoV band — qsCert → dovDeadline
+              (function(){
+                var x1 = contractX["qsCert"];
+                var x2 = contractX["dovDeadline"];
+                if(x1===undefined || x2===undefined) return null;
+                return h("div",{style:{position:"absolute",
+                  left:x1+"px", width:(x2-x1)+"px",
+                  top:"8px", height:"32px",
+                  background:"#4caf8210",
+                  border:"1px solid #4caf8233",
+                  borderRadius:2, zIndex:0}});
+              })(),
+
+              // Phase 4: teal delivery band — dovDeadline → modApproval (or 90d fallback)
+              (function(){
+                var x1 = contractX["dovDeadline"];
+                if(x1===undefined) return null;
+                var x2 = contractX["modApproval"];
+                var w = x2!==undefined ? (x2-x1) : Math.round(90*DPX);
+                if(w <= 0) w = Math.round(90*DPX);
+                return h("div",{style:{position:"absolute",
+                  left:x1+"px", width:w+"px",
+                  top:"8px", height:"32px",
+                  background:"#4ecece10",
+                  border:"1px solid #4ecece33",
+                  borderRadius:2, zIndex:0}});
               })(),
 
               // Actual progress spine (phase colour of design)
@@ -1265,6 +1441,7 @@ function GanttTab(props){
 
               // ── CONTRACTUAL MILESTONE LINES (white verticals) ──
               CONTRACT_STEPS.map(function(cs){
+                if(cs.noTick) return null;
                 var x = contractX[cs.key];
                 if(x===undefined) return null;
                 var isPast = new Date(u[cs.key]) <= TODAY;
@@ -1273,18 +1450,9 @@ function GanttTab(props){
                 var lineColor = isPast ? "#2e2e2e" : "#c8c0b044";
                 return h("div",{key:cs.key,
                   title:cs.label+": "+fmt2(u[cs.key])+" ("+dLabel+")",
-                  style:{position:"absolute",left:x+"px",top:4,zIndex:3,
-                    display:"flex",flexDirection:"column",alignItems:"center"}},
-                  // Vertical tick line
-                  h("div",{style:{width:1,height:44,background:isPast?"#252525":cs.color+"99"}}),
-                  // Date label above
-                  h("div",{style:{position:"absolute",top:0,left:2,
-                    fontSize:7,color:isPast?"#2e2e2e":cs.color+"cc",whiteSpace:"nowrap",
-                    letterSpacing:"0.03em"}},fmt2(u[cs.key])),
-                  // Label below
-                  h("div",{style:{position:"absolute",bottom:0,left:2,
-                    fontSize:7,color:isPast?"#252525":cs.color+"88",whiteSpace:"nowrap",
-                    maxWidth:50,overflow:"hidden",textOverflow:"ellipsis"}},cs.short)
+                  style:{position:"absolute",left:x+"px",top:4,zIndex:3}},
+                  // Vertical tick line — always phase colour
+                  h("div",{style:{width:1,height:ROW_H-12,background:cs.color+(isPast?"99":"bb")}})
                 );
               }),
 
@@ -1296,19 +1464,21 @@ function GanttTab(props){
                 // Phase 2 (designEnd→qsCert): builder, commercial
                 // Phase 3 (qsCert→dovIssue): dovApproval
 
+                var span90 = Math.round(90 * DPX);
+                var briefX = contractX["exchanged"];
                 var phases = [
-                  { steps:["sketch","layoutApproved","feasibility","cad","qsEst","confirm"], from:"brief", to:"designEnd" },
-                  { steps:["builder","commercial"], from:"designEnd", to:"qsCert" },
-                  { steps:["dovApproval"], from:"qsCert", to:"dovIssue" },
+                  { steps:["sketch","layoutApproved","costsIssued","feasibility","cad","qsEst","confirm"], fromX: briefX,                      fixedSpan:span90 },
+                  { steps:["builder","commercial"],                                                        fromX: briefX!==undefined ? briefX+span90 : undefined, fixedSpan:span90 },
+                  { steps:["dovApproval"], from:"qsCert",    to:"dovIssue" },
+                  { steps:["depositPaid"], from:"dovIssue",  to:"dovDeadline" },
+                  { steps:["hickory","planning"], from:"dovDeadline", fixedSpan:span90 },
                 ];
 
                 var diamonds = [];
                 phases.forEach(function(phase){
-                  var x1 = contractX[phase.from];
-                  var x2 = contractX[phase.to];
-                  if(x1===undefined && x2===undefined) return;
-                  // Use today as fallback if no from
-                  if(x1===undefined) x1 = todayX;
+                  var x1 = phase.fromX !== undefined ? phase.fromX : contractX[phase.from];
+                  if(x1===undefined) return;
+                  var x2 = phase.fixedSpan ? (x1 + phase.fixedSpan) : contractX[phase.to];
                   if(x2===undefined) x2 = x1 + 80;
 
                   var span = x2 - x1;
@@ -1321,22 +1491,42 @@ function GanttTab(props){
                   visibleSteps.forEach(function(sk,idx){
                     var pct = (idx+1)/(visibleSteps.length+1);
                     var dx = x1 + span*pct;
-                    var done = !!u[sk];
                     var ys = YELLOW_STEPS.find(function(y){ return y.key===sk; });
-                    var lbl = ys ? ys.label.replace(/^\d+\.\d+\s/,"") : sk;
+                    var done = ys && ys.dateOnly ? false : !!u[sk];
+                    var lbl = ys ? ys.label : sk;
                     var dc = ys ? ys.color : "#888";
+                    var isPurchaser = ys ? ys.purchaser : false;
+                    var tooltipLabel = (done?"✓ ":"")+lbl;
+                    // Wrapper holds diamond + hover tooltip
                     diamonds.push(h("div",{key:sk,
-                      title:(done?"✓ ":"Pending: ")+lbl,
-                      style:{position:"absolute",
-                        left:(dx-6)+"px",top:"17px",
+                      style:{position:"absolute",left:(dx-6)+"px",top:"17px",zIndex:5},
+                      onMouseEnter:function(e){
+                        var tip=e.currentTarget.querySelector(".dtip");
+                        if(tip) tip.style.display="block";
+                      },
+                      onMouseLeave:function(e){
+                        var tip=e.currentTarget.querySelector(".dtip");
+                        if(tip) tip.style.display="none";
+                      }},
+                      // Diamond
+                      h("div",{style:{
                         width:12,height:12,
                         background:done?dc:"transparent",
-                        border:"2px solid "+(done?dc:dc+"55"),
+                        border:done?"2px solid "+dc:(isPurchaser?"2px solid "+dc+"99":"1px dashed "+dc+"66"),
                         transform:"rotate(45deg)",
-                        zIndex:5,
-                        boxShadow:done?"0 0 5px "+dc+"66":"none",
-                        transition:"all 0.2s",
-                        cursor:"default"}}));
+                        boxShadow:done?"0 0 4px "+dc+"55":"none",
+                        transition:"all 0.2s",cursor:"default"}}),
+                      // Hover tooltip
+                      h("div",{className:"dtip",style:{
+                        display:"none",position:"absolute",
+                        bottom:18,left:"50%",transform:"translateX(-50%)",
+                        background:"#1e1c19",color:"#f0ede8",
+                        padding:"3px 7px",borderRadius:3,
+                        fontSize:9,whiteSpace:"nowrap",
+                        boxShadow:"0 2px 6px rgba(0,0,0,0.4)",
+                        pointerEvents:"none",zIndex:30,
+                        borderLeft:"2px solid "+dc}},tooltipLabel)
+                    ));
                   });
                 });
                 return diamonds;
@@ -1400,7 +1590,7 @@ function App(){
     ),
     // Tabs
     h("div",{style:{borderBottom:"1px solid #e8e3da",padding:"0 28px",display:"flex"}},
-      [{k:"overview",l:"Overview"},{k:"units",l:"Units & Actions"},{k:"gantt",l:"Gantt Chart"}].map(function(t){
+      [{k:"overview",l:"Overview"},{k:"units",l:"Units & Actions"},{k:"gantt",l:"Gantt Chart"},{k:"phases",l:"Phases & Milestones"}].map(function(t){
         var active=tab===t.k;
         return h("button",{key:t.k,
           onClick:function(){setTab(t.k);},
@@ -1415,7 +1605,8 @@ function App(){
     h("div",{style:{padding:"18px 12px"}},
       tab==="overview" && h(OverviewTab,null),
       tab==="units"    && h(UnitsTab,{onOpen:setModalUnit}),
-      tab==="gantt"    && h(GanttTab,{onOpen:setModalUnit})
+      tab==="gantt"    && h(GanttTab,{onOpen:setModalUnit}),
+      tab==="phases"   && h(PhasesTab,null)
     ),
     // Modal
     modalUnit && h(UnitModal,{unit:modalUnit,onClose:function(){setModalUnit(null);}})
