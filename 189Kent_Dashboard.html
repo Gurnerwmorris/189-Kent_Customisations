@@ -290,29 +290,30 @@ var BIC_NAME = {WM:"Will Morris", DW:"Deb Wiltshire", ED:"Elle Dearin", GD:"Giud
 var GRP_COL = {design:"#4c9af0", cost:"#b06cd0", legal:"#4caf82", delivery:"#4ecece"};
 
 var ALL_MILESTONES = [
-  // Phase 1 — Design (SC 68 — 90-day window)
-  {key:"brief",             label:"1. Written Brief Due",                      group:"design",   isBool:false, color:"#4c9af0"},
-  {key:"sketch",            label:"1.1 Sketch Plan Issued",                    group:"design",   isBool:true,  color:"#4c9af0"},
-  {key:"layoutApproved",    label:"1.2 Layout Confirmed — Letter Countersigned",group:"design",  isBool:true,  color:"#4c9af0"},
-  {key:"costsIssued",       label:"1.3 Cost Ranges Issued to Purchaser",       group:"design",   isBool:true,  color:"#4c9af0"},
-  {key:"feasibility",       label:"1.4 Interiors & Finishes Confirmed",        group:"design",   isBool:true,  color:"#4c9af0"},
-  {key:"cad",               label:"1.5 FJC CAD Plans Issued for Pricing",      group:"design",   isBool:true,  color:"#4c9af0"},
-  {key:"qsEst",             label:"1.6 Final Pricing Issued to Purchaser",     group:"design",   isBool:true,  color:"#4c9af0"},
-  {key:"confirm",           label:"1.7 Purchaser Confirms Final Pricing",      group:"design",   isBool:true,  color:"#4c9af0"},
-  {key:"designEnd",         label:"1.8 Design Period End",                     group:"design",   isBool:false, color:"#4c9af0"},
+  // Phase 1 — Design (SC 68 — 150-day window)
+  {key:"brief",             label:"1.0 Written Brief Due / Design Briefing Session", group:"design",   isBool:false, color:"#4c9af0"},
+  {key:"sketch",            label:"1.2 Sketch Plan Issued",                    group:"design",   isBool:true,  color:"#4c9af0"},
+  {key:"layoutApproved",    label:"1.3 Letter #1 Issued: Cost Range and Layout Confirmed", group:"design", isBool:true, color:"#4c9af0"},
+  {key:"costsIssued",       label:"1.4 KEY MILESTONE: Layout and Cost Range Letter #1 Signed", group:"design", isBool:true, color:"#4c9af0"},
+  {key:"feasibility",       label:"1.2 Buildability Review",                   group:"design",   isBool:true,  color:"#4c9af0"},
+  {key:"cad",               label:"1.5 Sketch Layout Converted to CAD by Architect", group:"design", isBool:true, color:"#4c9af0"},
+  {key:"qsEst",             label:"1.7 Letter #2 Issued: Updated Cost Range and Interiors Confirmed", group:"design", isBool:true, color:"#4c9af0"},
+  {key:"confirm",           label:"1.8 KEY MILESTONE: Interiors and Cost Range Letter #2 Signed", group:"design", isBool:true, color:"#4c9af0"},
+  {key:"designEnd",         label:"1.9 Move to Phase 2 – COST",                group:"design",   isBool:false, color:"#4c9af0"},
   // Phase 2 — Cost
-  {key:"builder",           label:"2.1 Builder Budget Pricing",                group:"cost",     isBool:true,  color:"#b06cd0"},
-  {key:"commercial",        label:"2.2 Internal Commercial Review",            group:"cost",     isBool:true,  color:"#b06cd0"},
-  {key:"qsCert",            label:"2.3 QS Cost Certification",                 group:"cost",     isBool:false, color:"#b06cd0"},
+  {key:"builder",           label:"2.1 Builder Pricing",                       group:"cost",     isBool:true,  color:"#b06cd0"},
+  {key:"commercial",        label:"2.3 Internal Commercial Review",            group:"cost",     isBool:true,  color:"#b06cd0"},
+  {key:"qsCert",            label:"2.2 QS Cost Certification",                 group:"cost",     isBool:false, color:"#b06cd0"},
   // Phase 3 — Legal
   {key:"dovApproval",       label:"3.1 Internal DoV Approval",                 group:"legal",    isBool:true,  color:"#4caf82"},
-  {key:"dovIssue",          label:"3.2 DoV Issued to Purchaser",               group:"legal",    isBool:false, color:"#4caf82"},
-  {key:"dovDeadline",       label:"3.3 Purchaser Executes DoV",                group:"legal",    isBool:false, color:"#4caf82"},
+  {key:"dovIssue",          label:"3.2 DoV and SA Invoice Issued to Client",   group:"legal",    isBool:false, color:"#4caf82"},
+  {key:"dovDeadline",       label:"3.3 Client Executes DoV",                   group:"legal",    isBool:false, color:"#4caf82"},
   {key:"depositPaid",       label:"3.4 Deposit Top-Up Paid",                   group:"legal",    isBool:true,  color:"#4caf82"},
   // Phase 4 — Delivery
-  {key:"hickory",           label:"4.1 Instructed to Hickory",                 group:"delivery", isBool:false, color:"#4ecece"},
-  {key:"planning",          label:"4.2 Planning Submission",                   group:"delivery", isBool:false, color:"#4ecece"},
+  {key:"hickory",           label:"4.1 Instructed to Builder",                 group:"delivery", isBool:false, color:"#4ecece"},
+  {key:"planning",          label:"4.2 Planning / DA Modification Submission", group:"delivery", isBool:false, color:"#4ecece"},
   {key:"modApproval",       label:"4.3 Modification Approval",                 group:"delivery", isBool:false, color:"#4ecece"},
+  {key:"completionDeadline",label:"4.4 Project Completion Deadline / Registration of Strata Plan", group:"delivery", isBool:false, color:"#4ecece"},
 ];
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
@@ -326,13 +327,13 @@ function fmtP(p){ return p ? "$"+(p/1e6).toFixed(2)+"M" : "—"; }
 function bicCol(b){ return BIC_COL[b]||"#888"; }
 
 function getStage(u){
-  if(u.confirm)      return {label:"1.7 Purchaser Confirms Final Pricing",  pct:85, color:"#4caf82"};
-  if(u.qsEst)        return {label:"1.6 Final Pricing Issued",              pct:72, color:"#4caf82"};
+  if(u.confirm)      return {label:"1.8 Letter #2 Signed",                  pct:85, color:"#4caf82"};
+  if(u.qsEst)        return {label:"1.7 Letter #2 Issued",                  pct:72, color:"#4caf82"};
   if(u.cad)          return {label:"1.5 CAD Plans Issued",                  pct:60, color:"#4caf82"};
-  if(u.feasibility)  return {label:"1.4 Interiors & Finishes Confirmed",    pct:48, color:"#c9a84c"};
-  if(u.costsIssued)  return {label:"1.3 Cost Ranges Issued",                pct:35, color:"#c9a84c"};
-  if(u.layoutApproved) return {label:"1.2 Layout Confirmed",                pct:25, color:"#c9a84c"};
-  if(u.sketch)       return {label:"1.1 Sketch Issued",                     pct:15, color:"#c9a84c"};
+  if(u.feasibility)  return {label:"1.2 Buildability Review",               pct:48, color:"#c9a84c"};
+  if(u.costsIssued)  return {label:"1.4 Letter #1 Signed",                  pct:35, color:"#c9a84c"};
+  if(u.layoutApproved) return {label:"1.3 Letter #1 Issued",                pct:25, color:"#c9a84c"};
+  if(u.sketch)       return {label:"1.2 Sketch Issued",                     pct:15, color:"#c9a84c"};
   if(u.brief && pd(u.brief)<=TODAY) return {label:"Brief Due — Sketch Pending", pct:8, color:"#e06060"};
   if(u.brief)        return {label:"Brief Pending",                          pct:3,  color:"#555"};
   return               {label:"Not Started",                                 pct:0,  color:"#7a736a"};
@@ -404,12 +405,12 @@ function UnitModal(props){
   var timelineSteps = [
     {l:"Brief",      done: !!u.brief && pd(u.brief)<=TODAY},
     {l:"Sketch",     done: u.sketch},
-    {l:"Layout",     done: u.layoutApproved},
-    {l:"Costs",      done: u.costsIssued},
-    {l:"Finishes",   done: u.feasibility},
+    {l:"Buildability",done: u.feasibility},
+    {l:"Letter #1",  done: u.layoutApproved},
+    {l:"#1 Signed",  done: u.costsIssued},
     {l:"CAD",        done: u.cad},
-    {l:"Pricing",    done: u.qsEst},
-    {l:"Confirmed",  done: u.confirm},
+    {l:"Letter #2",  done: u.qsEst},
+    {l:"#2 Signed",  done: u.confirm},
     {l:"Design End", done: u.designEnd && pd(u.designEnd)<=TODAY},
     {l:"QS Cert",    done: u.qsCert && pd(u.qsCert)<=TODAY},
     {l:"DoV Issued", done: u.dovIssue && pd(u.dovIssue)<=TODAY},
@@ -426,8 +427,9 @@ function UnitModal(props){
     {key:"qsCert",      label:"QS Certification",    date:u.qsCert,      color:"#b06cd0"},
     {key:"dovIssue",    label:"DoV Issue",           date:u.dovIssue,    color:"#4caf82"},
     {key:"dovDeadline", label:"DoV Deadline",        date:u.dovDeadline, color:"#4caf82"},
-    {key:"hickory",     label:"Instructed Hickory",  date:u.hickory,     color:"#4c9af0"},
+    {key:"hickory",     label:"Instructed to Builder",  date:u.hickory,     color:"#4c9af0"},
     {key:"modApproval", label:"Mod Approval",        date:u.modApproval, color:"#888"},
+    {key:"completionDeadline", label:"Project Completion",  date:u.completionDeadline, color:"#4ecece"},
   ].filter(function(m){ return !!m.date; });
 
   var ganttEl = null;
@@ -585,12 +587,12 @@ function UnitModal(props){
           timelineSteps.map(function(s,i){
             var active = i===lastDone+1;
             var done = s.done;
-            var c = done?"#4caf82":active?"#c9a84c":"#252525";
-            var tc = done?"#4caf82":active?"#c9a84c":"#333";
+            var c = done?"#4caf82":active?"#c9a84c":"#d5d0c8";
+            var tc = done?"#4caf82":active?"#c9a84c":"#9a9490";
             return [
               i>0 && h("div",{key:"line"+i,style:{flex:1,height:2,background:done?"#4caf8244":"#ebe7e0",minWidth:12}}),
               h("div",{key:"step"+i,style:{display:"flex",flexDirection:"column",alignItems:"center",gap:4,flexShrink:0}},
-                h("div",{style:{width:12,height:12,borderRadius:"50%",background:done?"#4caf82":active?"#c9a84c22":"#111",
+                h("div",{style:{width:12,height:12,borderRadius:"50%",background:done?"#4caf82":active?"#c9a84c22":"transparent",
                   border:"2px solid "+c,boxShadow:active?"0 0 8px #c9a84c66":"none"}}),
                 h("div",{style:{fontSize:9,color:tc,letterSpacing:"0.04em",textAlign:"center",maxWidth:52,lineHeight:1.3}},s.l)
               )
@@ -688,8 +690,8 @@ function OverviewTab(){
             // Derive colour from curStatus (column X) so all units at the same stage look identical
             var stColor=s.color;
             if(u.curStatus){
-              if(u.curStatus.startsWith("1.")&&!u.curStatus.startsWith("1.1")) stColor="#e06060";
-              else if(u.curStatus.startsWith("1.1")) stColor="#c9a84c";
+              if(u.curStatus.startsWith("1.")&&!u.curStatus.startsWith("1.0")) stColor="#e06060";
+              else if(u.curStatus.startsWith("1.0")) stColor="#c9a84c";
               else if(u.curStatus.startsWith("2.")) stColor="#4c9af0";
               else if(u.curStatus.startsWith("3.")) stColor="#b06cd0";
               else if(u.curStatus.startsWith("4.")||u.curStatus.startsWith("5.")) stColor="#4caf82";
@@ -831,7 +833,7 @@ function UnitsTab(props){
           var hasAction=!!(u.bic&&u.nextSteps);
           return h("div",{key:u.unit,
             style:{display:"grid",gridTemplateColumns:"90px 200px 100px 110px 125px 55px 52px 60px 40px 42px 60px 110px 170px 1fr 36px",
-              padding:"0",borderBottom:"1px solid #181818",transition:"background 0.1s",cursor:"default"}},
+              padding:"0",borderBottom:"1px solid #ebe7e0",transition:"background 0.1s",cursor:"default"}},
             // Unit col
             h("div",{style:{padding:"0 14px",display:"flex",alignItems:"stretch"}},
               h("div",{style:{display:"flex",alignItems:"center",width:"100%"}},
@@ -892,7 +894,7 @@ function UnitsTab(props){
                 if(!u.curStatus||u.curStatus.startsWith("NA")) return h("span",{style:{color:"#bbb5ad",fontSize:9}},"—");
                 var s=u.curStatus;
                 var style;
-                if(s.startsWith("1.")&&!s.startsWith("1.1"))
+                if(s.startsWith("1.")&&!s.startsWith("1.0"))
                   style={background:"#fdf0f0",color:"#c94040",border:"1px solid #f5b8b8"};
                 else if(s.startsWith("1."))
                   style={background:"#fdf8ee",color:"#b07a20",border:"1px solid #e8d89a"};
@@ -912,7 +914,7 @@ function UnitsTab(props){
             h("div",{style:{padding:"10px 8px 10px 0",fontSize:11,color:"#666",
               overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,
               WebkitBoxOrient:"vertical",lineHeight:1.5}},
-              u.nextSteps || h("span",{style:{color:"#282828"}},"—")
+              u.nextSteps || h("span",{style:{color:"#ccc7be"}},"—")
             ),
             // Action button
             h("div",{style:{padding:"8px 8px"}},
@@ -977,32 +979,33 @@ function UnitsTab(props){
 // ─── PHASES TAB ──────────────────────────────────────────────────────────────
 function PhasesTab(){
   var PHASES = [
-    {color:"#4c9af0",phase:"Phase 1 — Design",steps:"SC 68 — 90-day window",milestones:[
-      {n:"1.",  contract:true, label:"Written Brief Due",                           clause:"SC 68(b)(ii)(A)",    timing:"Within 20 business days of contract date", desc:"Purchaser submits written brief outlining requested bespoke changes to the vendor."},
-      {n:"1.1", contract:false,label:"Sketch Plan Issued",                          clause:"Gurner Short Form — Phase 1", timing:"Week 1", desc:"Design team prepares sketch plan. Buildability reviewed by GURNER™ team."},
-      {n:"1.2", contract:false,label:"Layout Confirmed — Letter Countersigned",     clause:"Gurner Short Form — Phase 2", timing:"Week 2", desc:"Purchaser countersigns letter confirming layout is approved. No further layout changes accepted after this point."},
-      {n:"1.3", contract:false,label:"Cost Ranges Issued to Purchaser",             clause:"Gurner Short Form — Phase 3", timing:"Week 2–4", desc:"Preliminary cost ranges for the bespoke design issued to purchaser for review and sign off before full design commences."},
-      {n:"1.4", contract:false,label:"Interiors & Finishes Confirmed by Purchaser", clause:"Gurner Short Form — Phase 4", timing:"Week 4–8", desc:"Finishes and bespoke drawings prepared. Purchaser confirms indicative costing of interiors and selections."},
-      {n:"1.5", contract:false,label:"FJC CAD Plans Issued for Pricing",            clause:"Gurner Short Form — Phase 4/5", timing:"Week 4–8", desc:"Architect issues CAD plans incorporating agreed bespoke works for QS pricing."},
-      {n:"1.6", contract:false,label:"Final Pricing Issued to Purchaser",           clause:"Gurner Short Form — Phase 5", timing:"Week 8–12", desc:"Final cost issued to purchaser. Final refinements based on costing resolved."},
-      {n:"1.7", contract:false,label:"Purchaser Confirms Final Pricing",            clause:"Gurner Short Form — Phase 5", timing:"Week 8–12", desc:"Purchaser confirms intent to proceed based on final pricing."},
-      {n:"1.8", contract:true, label:"Design Period End",                           clause:"SC 68(b)(ii)(D)",    timing:"3 months from contract date", desc:"End of the 90-day bespoke design period. Vendor may determine amendments unilaterally if no agreement reached by this date (SC 68(b)(ii)(F))."},
+    {color:"#4c9af0",phase:"Phase 1 — Design",steps:"SC 68 — 150-day window",milestones:[
+      {n:"1.0", contract:true, label:"Written Brief Due / Design Briefing Session", clause:"SC 68(b)(ii)(A)",    timing:"20 business days after COS Date", desc:"Purchaser submits written brief outlining requested bespoke changes to the vendor."},
+      {n:"1.2", contract:false,label:"Sketch Plan Issued",                          clause:"Gurner Short Form — Phase 1", timing:"Immediately after brief", desc:"Design team prepares sketch plan. Buildability reviewed by GURNER™ team."},
+      {n:"1.2", contract:false,label:"Buildability Review",                         clause:"Gurner Short Form — Phase 1", timing:"Immediately after brief", desc:"Internal buildability review of the sketch plan by GURNER™ and consultants."},
+      {n:"1.3", contract:false,label:"Letter #1 Issued: Cost Range and Layout Confirmed", clause:"Gurner Short Form — Phase 2", timing:"After Sketch Planning complete", desc:"Letter issued to purchaser with preliminary cost range and confirmed layout for sign off."},
+      {n:"1.4", contract:true, label:"KEY MILESTONE: Layout and Cost Range Letter #1 Signed", clause:"Gurner Short Form — Phase 2", timing:"After Sketch Planning complete", desc:"Purchaser countersigns Letter #1 confirming layout is approved. No further layout changes accepted after this point."},
+      {n:"1.5", contract:false,label:"Sketch Layout Converted to CAD by Architect", clause:"Gurner Short Form — Phase 4/5", timing:"Immediately after Consultant review", desc:"Architect issues CAD plans incorporating agreed bespoke works for QS pricing."},
+      {n:"1.7", contract:false,label:"Letter #2 Issued: Updated Cost Range and Interiors Confirmed", clause:"Gurner Short Form — Phase 5", timing:"During design period", desc:"Updated cost range and interiors selections issued to purchaser for sign off."},
+      {n:"1.8", contract:true, label:"KEY MILESTONE: Interiors and Cost Range Letter #2 Signed", clause:"Gurner Short Form — Phase 5", timing:"After QS estimate", desc:"Purchaser countersigns Letter #2 confirming interiors and updated cost range."},
+      {n:"1.9", contract:true, label:"Move to Phase 2 – COST",                      clause:"SC 68(b)(ii)(D)",    timing:"150 days after COS Date", desc:"End of the 150-day bespoke design period. Vendor may determine amendments unilaterally if no agreement reached by this date (SC 68(b)(ii)(F))."},
     ]},
     {color:"#b06cd0",phase:"Phase 2 — Cost",steps:"Post design agreement (~3 months)",milestones:[
-      {n:"2.1", contract:false,label:"Builder Budget Pricing",                      clause:"Gurner Internal",   timing:"Post design agreement", desc:"Builder provides budget variation pricing and constructability input."},
-      {n:"2.2", contract:false,label:"Internal Commercial Review",                  clause:"Gurner Internal",   timing:"Prior to QS certification", desc:"Internal Gurner confirmation of cost build-up and margin alignment."},
-      {n:"2.3", contract:true, label:"QS Cost Certification",                       clause:"SC 68(b)(ii)(G)",   timing:"After design agreed", desc:"Vendor instructs a Quantity Surveyor to certify the cost impact of the agreed bespoke design changes. The QS determination is conclusive evidence of the Certified Variation Amount (SC 68(b)(ii)(H))."},
+      {n:"2.1", contract:false,label:"Builder Pricing",                            clause:"Gurner Internal",   timing:"Post design agreement", desc:"Builder provides budget variation pricing and constructability input."},
+      {n:"2.3", contract:false,label:"Internal Commercial Review",                  clause:"Gurner Internal",   timing:"Prior to QS certification", desc:"Internal Gurner confirmation of cost build-up and margin alignment."},
+      {n:"2.2", contract:true, label:"QS Cost Certification",                       clause:"SC 68(b)(ii)(G)",   timing:"After design agreed (~3 month non-contractual)", desc:"Vendor instructs a Quantity Surveyor to certify the cost impact of the agreed bespoke design changes. The QS determination is conclusive evidence of the Certified Variation Amount (SC 68(b)(ii)(H))."},
     ]},
     {color:"#4caf82",phase:"Phase 3 — Legal (DoV)",steps:"Deed of Variation execution",milestones:[
       {n:"3.1", contract:false,label:"Internal DoV Approval",                       clause:"Gurner Internal",   timing:"After QS certification", desc:"Internal Gurner sign-off prior to issuing Deed of Variation. Gurner initials each page before issue."},
-      {n:"3.2", contract:true, label:"DoV Issued to Purchaser",                     clause:"SC 68(b)(ii)(J)",   timing:"After QS certification", desc:"Vendor drafts and issues Deed of Variation formally documenting agreed bespoke works, amended plans and specifications, and price adjustment."},
-      {n:"3.3", contract:true, label:"Purchaser Executes DoV",                      clause:"SC 68(b)(ii)(K)",   timing:"Within 14 days of issue, or Date for Completion (whichever earlier)", desc:"Purchaser must execute the Deed of Variation within 14 days. Note: contract is automatically amended under SC 68(c) regardless of whether the purchaser executes the DoV."},
+      {n:"3.2", contract:true, label:"DoV and SA Invoice Issued to Client",         clause:"SC 68(b)(ii)(J)",   timing:"Issued after QS certification", desc:"Vendor drafts and issues Deed of Variation formally documenting agreed bespoke works, amended plans and specifications, and price adjustment."},
+      {n:"3.3", contract:true, label:"Client Executes DoV",                         clause:"SC 68(b)(ii)(K)",   timing:"14 calendar days after DoV issued, or Date for Completion (whichever earlier)", desc:"Purchaser must execute the Deed of Variation within 14 days. Note: contract is automatically amended under SC 68(c) regardless of whether the purchaser executes the DoV."},
       {n:"3.4", contract:true, label:"Deposit Top-Up Paid",                         clause:"SC 68(b)(ii)(L)",   timing:"Within 10 business days of DoV date, or Date for Completion (whichever earlier)", desc:"Deposit amended to 10% of revised price. Purchaser pays outstanding balance — or vendor refunds overpayment if price decreased — within 10 business days of the Deed of Variation date."},
     ]},
     {color:"#4ecece",phase:"Phase 4 — Delivery",steps:"Construction & planning approvals",milestones:[
-      {n:"4.1", contract:true, label:"Instructed to Hickory",                       clause:"Internal programme", timing:"Post DoV execution", desc:"Builder instructed to proceed with bespoke works."},
-      {n:"4.2", contract:true, label:"Planning / DA Modification Submission",       clause:"Internal programme", timing:"Upon DoV execution", desc:"Recommended latest date to submit planning modification application to the relevant Consent Authority."},
+      {n:"4.1", contract:true, label:"Instructed to Builder",                       clause:"Internal programme", timing:"DoV Execution Date", desc:"Builder instructed to proceed with bespoke works."},
+      {n:"4.2", contract:true, label:"Planning / DA Modification Submission",       clause:"Internal programme", timing:"DoV execution + 60 days", desc:"Recommended latest date to submit planning modification application to the relevant Consent Authority."},
       {n:"4.3", contract:true, label:"Modification Approval",                       clause:"Clause 33.1 / SC 68(e)", timing:"Fixed contractual sunset date", desc:"Deadline by which s.4.55 DA modification approval must be obtained. Delivery of consolidated/customised lot is conditional on this approval (SC 68(e))."},
+      {n:"4.4", contract:true, label:"Project Completion Deadline / Registration of Strata Plan", clause:"Sunset Table",       timing:"Calculated", desc:"Deadline for project completion and registration of the strata plan with the Land Registry Services."},
     ]},
   ];
 
@@ -1066,9 +1069,9 @@ function GanttTab(props){
   };
   var CONTRACT_STEPS = [
     { key:"exchanged",   label:"Contract Exchanged",      short:"Exchanged", color:"#4c9af0",  phase:"design"   },
-    { key:"brief",       label:"1. Brief Due",            short:"Brief",     color:"#4c9af0",  phase:"design",   noTick:true },
-    { key:"designEnd",   label:"1.8 Design Period End",   short:"Design End",color:"#4c9af0",  phase:"design"   },
-    { key:"qsCert",      label:"2.3 QS Certification",   short:"QS Cert",   color:"#b06cd0",  phase:"cost"     },
+    { key:"brief",       label:"1.0 Brief Due",           short:"Brief",     color:"#4c9af0",  phase:"design",   noTick:true },
+    { key:"designEnd",   label:"1.9 Move to Phase 2",     short:"Design End",color:"#4c9af0",  phase:"design"   },
+    { key:"qsCert",      label:"2.2 QS Certification",   short:"QS Cert",   color:"#b06cd0",  phase:"cost"     },
     { key:"dovIssue",    label:"3.2 DoV Issued",          short:"DoV Issue", color:"#4caf82",  phase:"legal",    noTick:true },
     { key:"dovDeadline", label:"3.3 DoV Executed",        short:"DoV Sign",  color:"#4caf82",  phase:"legal"    },
     { key:"modApproval", label:"4.3 Mod Approval",        short:"Mod App",   color:"#4ecece",  phase:"delivery" },
@@ -1078,19 +1081,19 @@ function GanttTab(props){
   // purchaser:true = purchaser-facing sign-off (filled diamond when done)
   // purchaser:false = internal Gurner activity (outline diamond when done)
   var YELLOW_STEPS = [
-    { key:"sketch",         label:"1.1 Sketch Plan Issued",                          leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
-    { key:"layoutApproved", label:"1.2 Layout Confirmed — Letter Countersigned",     leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true  },
-    { key:"costsIssued",    label:"1.3 Cost Ranges Issued to Purchaser",             leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true  },
-    { key:"feasibility",    label:"1.4 Interiors & Finishes Confirmed by Purchaser", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true  },
-    { key:"cad",            label:"1.5 FJC CAD Plans Issued for Pricing",            leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
-    { key:"qsEst",          label:"1.6 Final Pricing Issued to Purchaser",           leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
-    { key:"confirm",        label:"1.7 Purchaser Confirms Final Pricing",            leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true  },
-    { key:"builder",        label:"2.1 Builder Budget Pricing",                      leadsTo:"qsCert",    color:"#b06cd0", phase:"cost",   purchaser:false },
-    { key:"commercial",     label:"2.2 Internal Commercial Review",                  leadsTo:"qsCert",    color:"#b06cd0", phase:"cost",   purchaser:false },
+    { key:"sketch",         label:"1.2 Sketch Plan Issued",                          leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
+    { key:"feasibility",    label:"1.2 Buildability Review",                         leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
+    { key:"layoutApproved", label:"1.3 Letter #1 Issued: Cost Range and Layout Confirmed", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true },
+    { key:"costsIssued",    label:"1.4 KEY MILESTONE: Layout and Cost Range Letter #1 Signed", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true },
+    { key:"cad",            label:"1.5 Sketch Layout Converted to CAD by Architect", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
+    { key:"qsEst",          label:"1.7 Letter #2 Issued: Updated Cost Range and Interiors Confirmed", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
+    { key:"confirm",        label:"1.8 KEY MILESTONE: Interiors and Cost Range Letter #2 Signed", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true },
+    { key:"builder",        label:"2.1 Builder Pricing",                             leadsTo:"qsCert",    color:"#b06cd0", phase:"cost",   purchaser:false },
+    { key:"commercial",     label:"2.3 Internal Commercial Review",                  leadsTo:"qsCert",    color:"#b06cd0", phase:"cost",   purchaser:false },
     { key:"dovApproval",    label:"3.1 Internal DoV Approval",                       leadsTo:"dovIssue",  color:"#4caf82", phase:"legal",    purchaser:false },
     { key:"depositPaid",    label:"3.4 Deposit Top-Up Paid",                         leadsTo:"dovDeadline",color:"#4caf82",phase:"legal",    purchaser:true  },
-    { key:"hickory",        label:"4.1 Instructed to Hickory",                       leadsTo:"modApproval",color:"#1a9999",phase:"delivery", purchaser:false, dateOnly:true },
-    { key:"planning",       label:"4.2 DA Modification Submission",                  leadsTo:"modApproval",color:"#1a9999",phase:"delivery", purchaser:false, dateOnly:true },
+    { key:"hickory",        label:"4.1 Instructed to Builder",                       leadsTo:"modApproval",color:"#1a9999",phase:"delivery", purchaser:false, dateOnly:true },
+    { key:"planning",       label:"4.2 Planning / DA Modification Submission",       leadsTo:"modApproval",color:"#1a9999",phase:"delivery", purchaser:false, dateOnly:true },
   ];
 
   var ganttUnits = UNITS.filter(function(u){
@@ -1127,7 +1130,7 @@ function GanttTab(props){
     pb[k]=medianDate(dates);
   });
   if(!pb.brief) pb.brief=minD;
-  if(!pb.designEnd) pb.designEnd=new Date(pb.brief.getTime()+90*86400000);
+  if(!pb.designEnd) pb.designEnd=new Date(pb.brief.getTime()+150*86400000);
   if(!pb.qsCert)    pb.qsCert=new Date(pb.designEnd.getTime()+90*86400000);
   if(!pb.dovDeadline) pb.dovDeadline=new Date(pb.qsCert.getTime()+60*86400000);
   if(!pb.modApproval) pb.modApproval=maxD;
@@ -1161,10 +1164,10 @@ function GanttTab(props){
     // Phase summary strip
     h("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:14}},
       [
-        {color:"#4c9af0",n:"1",label:"Design Phase",  sub:"SC 68 — 90-day window",      steps:"Brief → Sketch → Layout → Cost Ranges → Finishes → CAD → Pricing → Confirm → Design End"},
+        {color:"#4c9af0",n:"1",label:"Design Phase",  sub:"SC 68 — 150-day window",      steps:"Brief → Sketch → Buildability → Letter #1 (Layout/Cost) → CAD → Letter #2 (Interiors/Cost) → Move to Phase 2"},
         {color:"#b06cd0",n:"2",label:"Cost Phase",    sub:"Target — 3 Months", steps:"Builder Pricing → Commercial Review → QS Certification"},
         {color:"#4caf82",n:"3",label:"DoV Phase",     sub:"Deed of Variation execution", steps:"Internal Approval → DoV Issued → Purchaser Executes → Deposit Top-Up"},
-        {color:"#4ecece",n:"4",label:"Delivery",      sub:"Construction & planning",     steps:"Instructed to Hickory → DA Modification Submission → Modification Approval"},
+        {color:"#4ecece",n:"4",label:"Delivery",      sub:"Construction & planning",     steps:"Instructed to Builder → DA Modification Submission → Modification Approval → Project Completion"},
       ].map(function(ph){
         return h("div",{key:ph.n,style:{
           borderTop:"3px solid "+ph.color,
@@ -1212,7 +1215,7 @@ function GanttTab(props){
           borderBottom:"1px solid #ebe7e0",marginBottom:8}},
           months.map(function(m,i){
             return h("div",{key:i,style:{position:"absolute",left:m.x+"px",fontSize:9,
-              color:"#2e2e2e",letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap"}},m.label);
+              color:"#bbb5ad",letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap"}},m.label);
           }),
           // Today tick
           h("div",{style:{position:"absolute",left:todayX+"px",top:0,height:"100%",
@@ -1225,7 +1228,7 @@ function GanttTab(props){
           // Override colour and label from curStatus so all units at the same stage look identical
           if(u.curStatus && !u.curStatus.startsWith("NA")){
             stage = {pct:stage.pct, label:u.curStatus,
-              color: u.curStatus.startsWith("1.") && !u.curStatus.startsWith("1.1") ? "#e06060"
+              color: u.curStatus.startsWith("1.") && !u.curStatus.startsWith("1.0") ? "#e06060"
                    : u.curStatus.startsWith("1.")  ? "#c9a84c"
                    : u.curStatus.startsWith("2.")  ? "#b06cd0"
                    : u.curStatus.startsWith("3.")  ? "#4caf82"
@@ -1248,14 +1251,15 @@ function GanttTab(props){
             if(contractX[k] === undefined){ var x=xp(u[k]); if(x!==null) contractX[k]=x; }
           });
           // Pin phase boundaries so bands never overlap:
-          // Phase 1 (blue):  exchanged → exchanged+90d
-          // Phase 2 (purple): exchanged+90d → exchanged+180d
-          // Phase 3+ (green/teal): actual dates, but never before exchanged+180d
+          // Phase 1 (blue):  exchanged → exchanged+150d
+          // Phase 2 (purple): exchanged+150d → exchanged+240d
+          // Phase 3+ (green/teal): actual dates, but never before exchanged+240d
           if(contractX["exchanged"] !== undefined){
-            var _b   = contractX["exchanged"];
-            var _s90 = Math.round(90*DPX);
-            contractX["designEnd"] = _b + _s90;
-            contractX["qsCert"]    = _b + 2*_s90;
+            var _b    = contractX["exchanged"];
+            var _s150 = Math.round(150*DPX);
+            var _s90  = Math.round(90*DPX);
+            contractX["designEnd"] = _b + _s150;
+            contractX["qsCert"]    = _b + _s150 + _s90;
             var _floor = contractX["qsCert"];
             var _minGap = Math.round(21*DPX); // at least 21 days between Phase 3/4 milestones
             ["dovIssue","dovDeadline","hickory","planning","modApproval"].forEach(function(k){
@@ -1363,25 +1367,25 @@ function GanttTab(props){
                     left:x1+"px",width:(x2-x1)+"px",
                     top:"24px",height:2,background:seg.color+"33",zIndex:1}});
                 });
-                // Phase 1 spine: 90-day blue line from exchanged date
+                // Phase 1 spine: 150-day blue line from exchanged date
                 var p1x = contractX["exchanged"];
                 if(p1x !== undefined)
                   result.push(h("div",{key:"phase1spine",style:{position:"absolute",
-                    left:p1x+"px",width:Math.round(90*DPX)+"px",
+                    left:p1x+"px",width:Math.round(150*DPX)+"px",
                     top:"24px",height:2,background:"#4c9af044",zIndex:1}}));
-                // Phase 2 spine: 90-day purple line starting exactly where blue ends
+                // Phase 2 spine: 90-day purple line starting exactly where Phase 1 ends
                 if(p1x !== undefined)
                   result.push(h("div",{key:"phase2spine",style:{position:"absolute",
-                    left:(p1x+Math.round(90*DPX))+"px",width:Math.round(90*DPX)+"px",
+                    left:(p1x+Math.round(150*DPX))+"px",width:Math.round(90*DPX)+"px",
                     top:"24px",height:2,background:"#b06cd044",zIndex:1}}));
                 return result;
               })(),
 
-              // Phase 1: blue 90-day design window band (from exchange date)
+              // Phase 1: blue 150-day design window band (from exchange date)
               (function(){
                 var bx = contractX["exchanged"];
                 if(bx === undefined) return null;
-                var w = Math.round(90*DPX);
+                var w = Math.round(150*DPX);
                 return h("div",{style:{position:"absolute",
                   left:bx+"px", width:w+"px",
                   top:"8px", height:"32px",
@@ -1390,11 +1394,11 @@ function GanttTab(props){
                   borderRadius:2, zIndex:0}});
               })(),
 
-              // Phase 2: purple 90-day cost phase band — starts exactly where blue ends (exchanged+90d)
+              // Phase 2: purple 90-day cost phase band — starts exactly where Phase 1 ends (exchanged+150d)
               (function(){
                 var briefX = contractX["exchanged"];
                 if(briefX === undefined) return null;
-                var bx = briefX + Math.round(90*DPX);
+                var bx = briefX + Math.round(150*DPX);
                 var w = Math.round(90*DPX);
                 return h("div",{style:{position:"absolute",
                   left:bx+"px", width:w+"px",
@@ -1465,10 +1469,11 @@ function GanttTab(props){
                 // Phase 3 (qsCert→dovIssue): dovApproval
 
                 var span90 = Math.round(90 * DPX);
+                var span150 = Math.round(150 * DPX);
                 var briefX = contractX["exchanged"];
                 var phases = [
-                  { steps:["sketch","layoutApproved","costsIssued","feasibility","cad","qsEst","confirm"], fromX: briefX,                      fixedSpan:span90 },
-                  { steps:["builder","commercial"],                                                        fromX: briefX!==undefined ? briefX+span90 : undefined, fixedSpan:span90 },
+                  { steps:["sketch","layoutApproved","costsIssued","feasibility","cad","qsEst","confirm"], fromX: briefX,                      fixedSpan:span150 },
+                  { steps:["builder","commercial"],                                                        fromX: briefX!==undefined ? briefX+span150 : undefined, fixedSpan:span90 },
                   { steps:["dovApproval"], from:"qsCert",    to:"dovIssue" },
                   { steps:["depositPaid"], from:"dovIssue",  to:"dovDeadline" },
                   { steps:["hickory","planning"], from:"dovDeadline", fixedSpan:span90 },
