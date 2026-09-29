@@ -73,50 +73,36 @@ function Export-Data {
             if ($null -eq $unitVal -or "$unitVal".Trim() -eq "") { break }
             $rows += [PSCustomObject]@{
                 unit=$unitVal; name=$ws.Cells($r,(ColNum "D")).Value2
-                agent=$ws.Cells($r,(ColNum "E")).Value2; status="$($ws.Cells($r,(ColNum 'F')).Value2)".Trim()
-                dateIssued=$ws.Cells($r,(ColNum "G")).Value2; exchanged=$ws.Cells($r,(ColNum "H")).Value2
-                price=$ws.Cells($r,(ColNum "I")).Value2; spec=$ws.Cells($r,(ColNum "P")).Value2
-                colour=$ws.Cells($r,(ColNum "Q")).Value2; amalgamation=$ws.Cells($r,(ColNum "R")).Value2
-                bespokeLot=$ws.Cells($r,(ColNum "S")).Value2; friendsFamily=$ws.Cells($r,(ColNum "T")).Value2
-                curStatus=$ws.Cells($r,(ColNum "X")).Value2; brief=$ws.Cells($r,(ColNum "Y")).Value2
-                sketch=$ws.Cells($r,(ColNum "Z")).Value2
-                layoutApproved=$ws.Cells($r,(ColNum "AA")).Value2
-                costsIssued=$ws.Cells($r,(ColNum "AB")).Value2   # AB: 1.3 Cost ranges issued to purchaser
-                feasibility=$ws.Cells($r,(ColNum "AC")).Value2   # AC: 1.4 Feasibility Review
-                cad=$ws.Cells($r,(ColNum "AD")).Value2           # AD: 1.5 FJC CAD Plans
-                qsEst=$ws.Cells($r,(ColNum "AE")).Value2         # AE: 1.6 QS Estimate Issued
-                confirm=$ws.Cells($r,(ColNum "AF")).Value2       # AF: 1.7 Purchaser Confirmation
-                designEnd=$ws.Cells($r,(ColNum "AG")).Value2     # AG: 2. Design Period End
-                builder=$ws.Cells($r,(ColNum "AH")).Value2       # AH: 2.1 Builder Budget Pricing
-                commercial=$ws.Cells($r,(ColNum "AI")).Value2    # AI: 2.2 Internal Commercial Review
-                qsCert=$ws.Cells($r,(ColNum "AJ")).Value2        # AJ: 3. QS Cost Certification
-                dovApproval=$ws.Cells($r,(ColNum "AK")).Value2   # AK: 3.1 Internal Approval to Issue DoV
-                dovIssue=$ws.Cells($r,(ColNum "AL")).Value2      # AL: 4. DoV Issue Date
-                dovDeadline=$ws.Cells($r,(ColNum "AM")).Value2   # AM: 5. Purchaser DoV Execution Deadline
-                hickory=$ws.Cells($r,(ColNum "AN")).Value2       # AN: 6. Instructed to Hickory
-                planning=$ws.Cells($r,(ColNum "AO")).Value2      # AO: 7. Recommended Planning Submission
-                modApproval=$ws.Cells($r,(ColNum "AP")).Value2   # AP: 8. Modification Approval Deadline
-                correspondence=$(
-                    $atCol = ColNum "AT"                         # AT: CORRESPONDENCE
-                    $hlUrl = $null
-                    foreach ($hl in $ws.Hyperlinks) {
-                        if ($hl.Range.Row -eq $r -and $hl.Range.Column -eq $atCol) {
-                            $hlUrl = $hl.Address
-                            if ($hlUrl -match '^(\.\.[\\/])+(.+)$') {
-                                $hlUrl = 'https://uiservicesptyltd.sharepoint.com/' + $Matches[2]
-                            }
-                            break
-                        }
-                    }
-                    if ($hlUrl) { $hlUrl } else { $ws.Cells($r, $atCol).Value2 }
-                )
-                bic=$ws.Cells($r,(ColNum "BB")).Value2           # BB: BALL IN COURT
-                nextSteps=$ws.Cells($r,(ColNum "BC")).Value2     # BC: NEXT STEPS
+                agent=$ws.Cells($r,(ColNum "F")).Value2; status="$($ws.Cells($r,(ColNum 'G')).Value2)".Trim()
+                dateIssued=$ws.Cells($r,(ColNum "H")).Value2; exchanged=$ws.Cells($r,(ColNum "I")).Value2
+                price=$ws.Cells($r,(ColNum "J")).Value2; spec=$ws.Cells($r,(ColNum "Q")).Value2
+                colour=$ws.Cells($r,(ColNum "R")).Value2; amalgamation=$ws.Cells($r,(ColNum "S")).Value2
+                bespokeLot=$ws.Cells($r,(ColNum "T")).Value2; friendsFamily=$ws.Cells($r,(ColNum "U")).Value2
+                curStatus=$ws.Cells($r,(ColNum "Y")).Value2; brief=$ws.Cells($r,(ColNum "Z")).Value2
+                sketch=$ws.Cells($r,(ColNum "AA")).Value2
+                layoutApproved=$ws.Cells($r,(ColNum "AB")).Value2
+                costsIssued=$ws.Cells($r,(ColNum "AC")).Value2   # AC: 1.4 KEY MILESTONE: Layout and Cost Range Letter #1 Signed
+                feasibility=$ws.Cells($r,(ColNum "AD")).Value2   # AD: 1.2 Buildability Review
+                cad=$ws.Cells($r,(ColNum "AE")).Value2           # AE: 1.5 Sketch Layout Converted to CAD by Architect
+                qsEst=$ws.Cells($r,(ColNum "AF")).Value2         # AF: 1.7 Letter #2 Issued: Updated Cost Range and Interiors Confirmed
+                confirm=$ws.Cells($r,(ColNum "AG")).Value2       # AG: 1.8 KEY MILESTONE: Interiors and Cost Range Letter #2 Signed
+                designEnd=$ws.Cells($r,(ColNum "AH")).Value2     # AH: 1.9 Move to Phase 2 - COST (150 days after COS date)
+                builder=$ws.Cells($r,(ColNum "AI")).Value2       # AI: 2.1 Builder Pricing
+                commercial=$ws.Cells($r,(ColNum "AJ")).Value2    # AJ: 2.3 Internal Commercial Review
+                qsCert=$ws.Cells($r,(ColNum "AK")).Value2        # AK: 2.2 QS Cost Certification
+                dovApproval=$ws.Cells($r,(ColNum "AL")).Value2   # AL: 3.1 Internal DoV Approval
+                dovIssue=$ws.Cells($r,(ColNum "AM")).Value2      # AM: 3.2 DoV and SA Invoice Issued to Client
+                dovDeadline=$ws.Cells($r,(ColNum "AN")).Value2   # AN: 3.3 Client Executes DoV
+                hickory=$ws.Cells($r,(ColNum "AO")).Value2       # AO: 4.1 Instructed to Builder
+                planning=$ws.Cells($r,(ColNum "AP")).Value2      # AP: 4.2 Planning / DA Modification Submission
+                modApproval=$ws.Cells($r,(ColNum "AQ")).Value2   # AQ: 4.3 Modification Approval
+                completionDeadline=$ws.Cells($r,(ColNum "AR")).Value2 # AR: 4.4 Project Completion Deadline / Registration of Strata Plan
+                lead=$ws.Cells($r,(ColNum "BF")).Value2          # BF: COMMS LEAD
                 bespokeLink=$(
-                    $asCol = ColNum "AS"                         # AS: BESPOKE PLAN
+                    $auCol = ColNum "AU"                         # AU: BESPOKE PLAN
                     $hlUrl = $null
                     foreach ($hl in $ws.Hyperlinks) {
-                        if ($hl.Range.Row -eq $r -and $hl.Range.Column -eq $asCol) {
+                        if ($hl.Range.Row -eq $r -and $hl.Range.Column -eq $auCol) {
                             $hlUrl = $hl.Address
                             # Excel stores SharePoint links as relative paths (../../...) when the
                             # file is synced via OneDrive. Strip the leading ../ traversals and
@@ -127,7 +113,23 @@ function Export-Data {
                             break
                         }
                     }
-                    if ($hlUrl) { $hlUrl } else { $ws.Cells($r, $asCol).Value2 }
+                    if ($hlUrl) { $hlUrl } else { $null }
+                )
+                bic=$ws.Cells($r,(ColNum "BD")).Value2           # BD: BALL IN COURT
+                nextSteps=$ws.Cells($r,(ColNum "BE")).Value2     # BE: NEXT STEPS
+                correspondence=$(
+                    $avCol = ColNum "AV"                         # AV: CORRESPONDENCE
+                    $hlUrl = $null
+                    foreach ($hl in $ws.Hyperlinks) {
+                        if ($hl.Range.Row -eq $r -and $hl.Range.Column -eq $avCol) {
+                            $hlUrl = $hl.Address
+                            if ($hlUrl -match '^(\.\.[\\/])+(.+)$') {
+                                $hlUrl = 'https://uiservicesptyltd.sharepoint.com/' + $Matches[2]
+                            }
+                            break
+                        }
+                    }
+                    if ($hlUrl) { $hlUrl } else { $ws.Cells($r, $avCol).Value2 }
                 )
             }
             $r++
@@ -153,12 +155,13 @@ function Export-Data {
                     "qsCert:$(XlDate $u.qsCert),dovIssue:$(XlDate $u.dovIssue)," +
                     "dovDeadline:$(XlDate $u.dovDeadline),hickory:$(XlDate $u.hickory)," +
                     "planning:$(XlDate $u.planning),modApproval:$(XlDate $u.modApproval)," +
+                    "completionDeadline:$(XlDate $u.completionDeadline)," +
                     "sketch:$(XlBool $u.sketch),layoutApproved:$(XlBool $u.layoutApproved)," +
                     "costsIssued:$(XlBool $u.costsIssued),feasibility:$(XlBool $u.feasibility)," +
                     "cad:$(XlBool $u.cad),qsEst:$(XlBool $u.qsEst),confirm:$(XlBool $u.confirm)," +
                     "builder:$(XlBool $u.builder),commercial:$(XlBool $u.commercial)," +
                     "dovApproval:$(XlBool $u.dovApproval),bic:$(XlStr $u.bic)," +
-                    "nextSteps:$(XlStr $u.nextSteps)," +
+                    "lead:$(XlStr $u.lead),nextSteps:$(XlStr $u.nextSteps)," +
                     "correspondence:$(XlStr $u.correspondence)," +
                     "bespokeLink:$(XlStr $u.bespokeLink)}$comma"
             $lines.Add($line)
