@@ -83,23 +83,24 @@ function Export-Data {
                 layoutApproved=$ws.Cells($r,(ColNum "AB")).Value2
                 costsIssued=$ws.Cells($r,(ColNum "AC")).Value2   # AC: 1.4 KEY MILESTONE: Layout and Cost Range Letter #1 Signed
                 feasibility=$ws.Cells($r,(ColNum "AD")).Value2   # AD: 1.2 Buildability Review
-                cad=$ws.Cells($r,(ColNum "AE")).Value2           # AE: 1.5 Sketch Layout Converted to CAD by Architect
-                qsEst=$ws.Cells($r,(ColNum "AF")).Value2         # AF: 1.7 Letter #2 Issued: Updated Cost Range and Interiors Confirmed
-                confirm=$ws.Cells($r,(ColNum "AG")).Value2       # AG: 1.8 KEY MILESTONE: Interiors and Cost Range Letter #2 Signed
-                designEnd=$ws.Cells($r,(ColNum "AH")).Value2     # AH: 1.9 Move to Phase 2 - COST (150 days after COS date)
-                builder=$ws.Cells($r,(ColNum "AI")).Value2       # AI: 2.1 Builder Pricing
-                commercial=$ws.Cells($r,(ColNum "AJ")).Value2    # AJ: 2.3 Internal Commercial Review
-                qsCert=$ws.Cells($r,(ColNum "AK")).Value2        # AK: 2.2 QS Cost Certification
-                dovApproval=$ws.Cells($r,(ColNum "AL")).Value2   # AL: 3.1 Internal DoV Approval
-                dovIssue=$ws.Cells($r,(ColNum "AM")).Value2      # AM: 3.2 DoV and SA Invoice Issued to Client
-                dovDeadline=$ws.Cells($r,(ColNum "AN")).Value2   # AN: 3.3 Client Executes DoV
-                hickory=$ws.Cells($r,(ColNum "AO")).Value2       # AO: 4.1 Instructed to Builder
-                planning=$ws.Cells($r,(ColNum "AP")).Value2      # AP: 4.2 Planning / DA Modification Submission
-                modApproval=$ws.Cells($r,(ColNum "AQ")).Value2   # AQ: 4.3 Modification Approval
-                completionDeadline=$ws.Cells($r,(ColNum "AR")).Value2 # AR: 4.4 Project Completion Deadline / Registration of Strata Plan
-                lead=$ws.Cells($r,(ColNum "BF")).Value2          # BF: COMMS LEAD
+                layoutDesign=$ws.Cells($r,(ColNum "AE")).Value2  # AE: 1.2.1 Layout Design Approved
+                cad=$ws.Cells($r,(ColNum "AF")).Value2           # AF: 1.5 Sketch Layout Converted to CAD by Architect
+                qsEst=$ws.Cells($r,(ColNum "AG")).Value2         # AG: 1.7 Letter #2 Issued: Updated Cost Range and Interiors Confirmed
+                confirm=$ws.Cells($r,(ColNum "AH")).Value2       # AH: 1.8 KEY MILESTONE: Interiors and Cost Range Letter #2 Signed
+                designEnd=$ws.Cells($r,(ColNum "AI")).Value2     # AI: 1.9 Move to Phase 2 - COST (150 days after COS date)
+                builder=$ws.Cells($r,(ColNum "AJ")).Value2       # AJ: 2.1 Builder Pricing
+                commercial=$ws.Cells($r,(ColNum "AK")).Value2    # AK: 2.3 Internal Commercial Review
+                qsCert=$ws.Cells($r,(ColNum "AL")).Value2        # AL: 2.2 QS Cost Certification
+                dovApproval=$ws.Cells($r,(ColNum "AM")).Value2   # AM: 3.1 Internal DoV Approval
+                dovIssue=$ws.Cells($r,(ColNum "AN")).Value2      # AN: 3.2 DoV and SA Invoice Issued to Client
+                dovDeadline=$ws.Cells($r,(ColNum "AO")).Value2   # AO: 3.3 Client Executes DoV
+                hickory=$ws.Cells($r,(ColNum "AP")).Value2       # AP: 4.1 Instructed to Builder
+                planning=$ws.Cells($r,(ColNum "AQ")).Value2      # AQ: 4.2 Planning / DA Modification Submission
+                modApproval=$ws.Cells($r,(ColNum "AR")).Value2   # AR: 4.3 Modification Approval
+                completionDeadline=$ws.Cells($r,(ColNum "AS")).Value2 # AS: 4.4 Project Completion Deadline / Registration of Strata Plan
+                lead=$ws.Cells($r,(ColNum "BG")).Value2          # BG: COMMS LEAD
                 bespokeLink=$(
-                    $auCol = ColNum "AU"                         # AU: BESPOKE PLAN
+                    $auCol = ColNum "AV"                         # AV: BESPOKE PLAN
                     $hlUrl = $null
                     foreach ($hl in $ws.Hyperlinks) {
                         if ($hl.Range.Row -eq $r -and $hl.Range.Column -eq $auCol) {
@@ -115,10 +116,10 @@ function Export-Data {
                     }
                     if ($hlUrl) { $hlUrl } else { $null }
                 )
-                bic=$ws.Cells($r,(ColNum "BD")).Value2           # BD: BALL IN COURT
-                nextSteps=$ws.Cells($r,(ColNum "BE")).Value2     # BE: NEXT STEPS
+                bic=$ws.Cells($r,(ColNum "BE")).Value2           # BE: BALL IN COURT
+                nextSteps=$ws.Cells($r,(ColNum "BF")).Value2     # BF: NEXT STEPS
                 correspondence=$(
-                    $avCol = ColNum "AV"                         # AV: CORRESPONDENCE
+                    $avCol = ColNum "AW"                         # AW: CORRESPONDENCE
                     $hlUrl = $null
                     foreach ($hl in $ws.Hyperlinks) {
                         if ($hl.Range.Row -eq $r -and $hl.Range.Column -eq $avCol) {
@@ -158,7 +159,7 @@ function Export-Data {
                     "completionDeadline:$(XlDate $u.completionDeadline)," +
                     "sketch:$(XlBool $u.sketch),layoutApproved:$(XlBool $u.layoutApproved)," +
                     "costsIssued:$(XlBool $u.costsIssued),feasibility:$(XlBool $u.feasibility)," +
-                    "cad:$(XlBool $u.cad),qsEst:$(XlBool $u.qsEst),confirm:$(XlBool $u.confirm)," +
+                    "layoutDesign:$(XlBool $u.layoutDesign),cad:$(XlBool $u.cad),qsEst:$(XlBool $u.qsEst),confirm:$(XlBool $u.confirm)," +
                     "builder:$(XlBool $u.builder),commercial:$(XlBool $u.commercial)," +
                     "dovApproval:$(XlBool $u.dovApproval),bic:$(XlStr $u.bic)," +
                     "lead:$(XlStr $u.lead),nextSteps:$(XlStr $u.nextSteps)," +

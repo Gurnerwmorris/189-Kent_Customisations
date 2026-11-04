@@ -285,6 +285,12 @@ if (typeof window.UNITS_FROM_EXCEL !== "undefined" && window.UNITS_FROM_EXCEL.le
   UNITS = window.UNITS_FROM_EXCEL;
 }
 
+// Units in the tracker that haven't sold and shouldn't appear anywhere on the dashboard.
+var HIDDEN_UNITS = ["1501S/1502S"];
+UNITS = UNITS.filter(function(u){
+  return HIDDEN_UNITS.indexOf(String(u.unit||"").trim().toUpperCase()) < 0;
+});
+
 var BIC_COL  = {DW:"#4c9af0", WM:"#c9a84c", ED:"#b06cd0", GD:"#4caf82", TBC:"#888"};
 var BIC_NAME = {WM:"Will Morris", DW:"Deb Wiltshire", ED:"Elle Dearin", GD:"Giuditta De Santis", TBC:"TBC"};
 var GRP_COL = {design:"#4c9af0", cost:"#b06cd0", legal:"#4caf82", delivery:"#4ecece"};
@@ -296,6 +302,7 @@ var ALL_MILESTONES = [
   {key:"layoutApproved",    label:"1.3 Letter #1 Issued: Cost Range and Layout Confirmed", group:"design", isBool:true, color:"#4c9af0"},
   {key:"costsIssued",       label:"1.4 KEY MILESTONE: Layout and Cost Range Letter #1 Signed", group:"design", isBool:true, color:"#4c9af0"},
   {key:"feasibility",       label:"1.2 Buildability Review",                   group:"design",   isBool:true,  color:"#4c9af0"},
+  {key:"layoutDesign",      label:"1.2.1 Layout Design Approved",              group:"design",   isBool:true,  color:"#4c9af0"},
   {key:"cad",               label:"1.5 Sketch Layout Converted to CAD by Architect", group:"design", isBool:true, color:"#4c9af0"},
   {key:"qsEst",             label:"1.7 Letter #2 Issued: Updated Cost Range and Interiors Confirmed", group:"design", isBool:true, color:"#4c9af0"},
   {key:"confirm",           label:"1.8 KEY MILESTONE: Interiors and Cost Range Letter #2 Signed", group:"design", isBool:true, color:"#4c9af0"},
@@ -325,11 +332,16 @@ function fmt(s){
 }
 function fmtP(p){ return p ? "$"+(p/1e6).toFixed(2)+"M" : "—"; }
 function bicCol(b){ return BIC_COL[b]||"#888"; }
+// Units with no bespoke lot clause that still follow the full customisation steps,
+// so they appear on the Gantt chart with every step.
+var GANTT_ALSO_INCLUDE = ["1901N"];
+function onGanttAnyway(u){ return GANTT_ALSO_INCLUDE.indexOf(String(u.unit||"").trim().toUpperCase()) >= 0; }
 
 function getStage(u){
   if(u.confirm)      return {label:"1.8 Letter #2 Signed",                  pct:85, color:"#4caf82"};
   if(u.qsEst)        return {label:"1.7 Letter #2 Issued",                  pct:72, color:"#4caf82"};
   if(u.cad)          return {label:"1.5 CAD Plans Issued",                  pct:60, color:"#4caf82"};
+  if(u.layoutDesign) return {label:"1.2.1 Layout Design Approved",          pct:52, color:"#c9a84c"};
   if(u.feasibility)  return {label:"1.2 Buildability Review",               pct:48, color:"#c9a84c"};
   if(u.costsIssued)  return {label:"1.4 Letter #1 Signed",                  pct:35, color:"#c9a84c"};
   if(u.layoutApproved) return {label:"1.3 Letter #1 Issued",                pct:25, color:"#c9a84c"};
@@ -406,6 +418,7 @@ function UnitModal(props){
     {l:"Brief",      done: !!u.brief && pd(u.brief)<=TODAY},
     {l:"Sketch",     done: u.sketch},
     {l:"Buildability",done: u.feasibility},
+    {l:"Layout Appr.",done: u.layoutDesign},
     {l:"Letter #1",  done: u.layoutApproved},
     {l:"#1 Signed",  done: u.costsIssued},
     {l:"CAD",        done: u.cad},
@@ -983,6 +996,7 @@ function PhasesTab(){
       {n:"1.0", contract:true, label:"Written Brief Due / Design Briefing Session", clause:"SC 68(b)(ii)(A)",    timing:"20 business days after COS Date", desc:"Purchaser submits written brief outlining requested bespoke changes to the vendor."},
       {n:"1.2", contract:false,label:"Sketch Plan Issued",                          clause:"Gurner Short Form — Phase 1", timing:"Immediately after brief", desc:"Design team prepares sketch plan. Buildability reviewed by GURNER™ team."},
       {n:"1.2", contract:false,label:"Buildability Review",                         clause:"Gurner Short Form — Phase 1", timing:"Immediately after brief", desc:"Internal buildability review of the sketch plan by GURNER™ and consultants."},
+      {n:"1.2.1", contract:false,label:"Layout Design Approved",                    clause:"Gurner Short Form — Phase 1", timing:"After Buildability Review", desc:"Layout design approved, ready to issue Letter #1 with cost range and confirmed layout."},
       {n:"1.3", contract:false,label:"Letter #1 Issued: Cost Range and Layout Confirmed", clause:"Gurner Short Form — Phase 2", timing:"After Sketch Planning complete", desc:"Letter issued to purchaser with preliminary cost range and confirmed layout for sign off."},
       {n:"1.4", contract:true, label:"KEY MILESTONE: Layout and Cost Range Letter #1 Signed", clause:"Gurner Short Form — Phase 2", timing:"After Sketch Planning complete", desc:"Purchaser countersigns Letter #1 confirming layout is approved. No further layout changes accepted after this point."},
       {n:"1.5", contract:false,label:"Sketch Layout Converted to CAD by Architect", clause:"Gurner Short Form — Phase 4/5", timing:"Immediately after Consultant review", desc:"Architect issues CAD plans incorporating agreed bespoke works for QS pricing."},
@@ -1083,6 +1097,7 @@ function GanttTab(props){
   var YELLOW_STEPS = [
     { key:"sketch",         label:"1.2 Sketch Plan Issued",                          leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
     { key:"feasibility",    label:"1.2 Buildability Review",                         leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
+    { key:"layoutDesign",   label:"1.2.1 Layout Design Approved",                    leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
     { key:"layoutApproved", label:"1.3 Letter #1 Issued: Cost Range and Layout Confirmed", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true },
     { key:"costsIssued",    label:"1.4 KEY MILESTONE: Layout and Cost Range Letter #1 Signed", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true },
     { key:"cad",            label:"1.5 Sketch Layout Converted to CAD by Architect", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
@@ -1097,7 +1112,7 @@ function GanttTab(props){
   ];
 
   var ganttUnits = UNITS.filter(function(u){
-    if(u.bespokeLot !== "YES") return false;
+    if(u.bespokeLot !== "YES" && !onGanttAnyway(u)) return false;
     if(!showIssued && u.status==="ISSUED") return false;
     return true;
   }).sort(function(a,b){
@@ -1164,7 +1179,7 @@ function GanttTab(props){
     // Phase summary strip
     h("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:14}},
       [
-        {color:"#4c9af0",n:"1",label:"Design Phase",  sub:"SC 68 — 150-day window",      steps:"Brief → Sketch → Buildability → Letter #1 (Layout/Cost) → CAD → Letter #2 (Interiors/Cost) → Move to Phase 2"},
+        {color:"#4c9af0",n:"1",label:"Design Phase",  sub:"SC 68 — 150-day window",      steps:"Brief → Sketch → Buildability → Layout Design Approved → Letter #1 (Layout/Cost) → CAD → Letter #2 (Interiors/Cost) → Move to Phase 2"},
         {color:"#b06cd0",n:"2",label:"Cost Phase",    sub:"Target — 3 Months", steps:"Builder Pricing → Commercial Review → QS Certification"},
         {color:"#4caf82",n:"3",label:"DoV Phase",     sub:"Deed of Variation execution", steps:"Internal Approval → DoV Issued → Purchaser Executes → Deposit Top-Up"},
         {color:"#4ecece",n:"4",label:"Delivery",      sub:"Construction & planning",     steps:"Instructed to Builder → DA Modification Submission → Modification Approval → Project Completion"},
@@ -1307,7 +1322,7 @@ function GanttTab(props){
                       letterSpacing:"0.03em",flexShrink:0}},u.unit),
                     h(BicBadge,{bic:u.bic})
                   ),
-                  // Overdue badge — always at same x position
+                  // "Days left" badge (overdue counter removed) — always at same x position
                   (function(){
                     if(!u.exchanged) return null;
                     var nextDue = null;
@@ -1326,10 +1341,6 @@ function GanttTab(props){
                       color:dLeft<14?"#e06060":"#4c9af0",
                       border:"1px solid "+(dLeft<14?"#e0606044":"#4c9af044"),
                       whiteSpace:"nowrap"}},dLeft+"d left");
-                    if(dLeft <= 0) return h("span",{style:{fontSize:8,padding:"1px 4px",borderRadius:2,
-                      flexShrink:0,
-                      background:"#e0606022",color:"#e06060",border:"1px solid #e0606044",
-                      whiteSpace:"nowrap"}},Math.abs(dLeft)+"d overdue");
                     return null;
                   })()
                 ),
@@ -1472,7 +1483,7 @@ function GanttTab(props){
                 var span150 = Math.round(150 * DPX);
                 var briefX = contractX["exchanged"];
                 var phases = [
-                  { steps:["sketch","layoutApproved","costsIssued","feasibility","cad","qsEst","confirm"], fromX: briefX,                      fixedSpan:span150 },
+                  { steps:["sketch","layoutApproved","costsIssued","feasibility","layoutDesign","cad","qsEst","confirm"], fromX: briefX,                      fixedSpan:span150 },
                   { steps:["builder","commercial"],                                                        fromX: briefX!==undefined ? briefX+span150 : undefined, fixedSpan:span90 },
                   { steps:["dovApproval"], from:"qsCert",    to:"dovIssue" },
                   { steps:["depositPaid"], from:"dovIssue",  to:"dovDeadline" },
@@ -1489,7 +1500,7 @@ function GanttTab(props){
                   var span = x2 - x1;
                   var visibleSteps = phase.steps.filter(function(sk){
                     // Always show sketch; others only for bespoke
-                    return sk==="sketch" || u.bespoke;
+                    return sk==="sketch" || u.bespoke || onGanttAnyway(u);
                   });
                   if(!visibleSteps.length) return;
 
