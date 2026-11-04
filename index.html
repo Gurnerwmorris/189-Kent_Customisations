@@ -292,6 +292,12 @@ UNITS = UNITS.filter(function(u){
   return HIDDEN_UNITS.indexOf(String(u.unit||"").trim().toUpperCase()) < 0;
 });
 
+// Next Steps cells keep a history of notes. Show only the latest one everywhere on the dashboard.
+UNITS.forEach(function(u){
+  var n = latestNote(u.nextSteps);
+  u.nextSteps = n ? (n.date ? n.date + " – " + n.text : n.text) : null;
+});
+
 var BIC_COL  = {DW:"#4c9af0", WM:"#c9a84c", MW:"#d9822b", ED:"#b06cd0", GD:"#4caf82", TBC:"#888"};
 var BIC_NAME = {WM:"Will Morris", MW:"Morgan Wolpers", DW:"Deb Wiltshire", ED:"Elle Dearin", GD:"Giuditta De Santis", TBC:"TBC"};
 // Ball in court can hold several people, e.g. "MW/WM" — split it into initials.
@@ -1379,10 +1385,10 @@ function GanttTab(props){
                     return acc;
                   },[]))
               ),
-              // NEXT STEPS box — latest note only (full notes on hover)
+              // NEXT STEPS box — latest note only (full latest note on hover)
               (function(){
                 var note = latestNote(u.nextSteps);
-                return h("div",{title:u.nextSteps||"",
+                return h("div",{title:note ? note.text : "",
                   style:{width:(NOTES_W-12)+"px",flexShrink:0,alignSelf:"stretch",
                     background:"#faf8f4",border:"1px solid #e8e3da",borderRadius:3,
                     padding:"4px 7px",overflow:"hidden",display:"flex",flexDirection:"column",gap:2}},
