@@ -1146,7 +1146,14 @@ function GanttTab(props){
     if(!showIssued && u.status==="ISSUED") return false;
     return true;
   }).sort(function(a,b){
-    return new Date(a.exchanged||a.brief||"2027-01-01") - new Date(b.exchanged||b.brief||"2027-01-01");
+    // Apartment number order, lowest first (e.g. 502S, 0701S, 0801S … 2501S).
+    // Amalgamations like "1901/1902S" sort by their first number; N before S on the same number.
+    function key(u){
+      var s = String(u.unit||"").toUpperCase(), m = s.match(/\d+/);
+      return { n: m ? +m[0] : 99999, t: (s.match(/[NS]/)||["Z"])[0] };
+    }
+    var ka = key(a), kb = key(b);
+    return ka.n - kb.n || (ka.t < kb.t ? -1 : ka.t > kb.t ? 1 : 0);
   });
 
   var NOTES_W = 230;              // "Next Steps" box beside the unit details
