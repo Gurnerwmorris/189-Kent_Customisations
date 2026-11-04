@@ -703,7 +703,7 @@ function OverviewTab(){
             // Derive colour from curStatus (column X) so all units at the same stage look identical
             var stColor=s.color;
             if(u.curStatus){
-              if(u.curStatus.startsWith("1.")&&!u.curStatus.startsWith("1.0")) stColor="#e06060";
+              if(u.curStatus.startsWith("1.")&&!u.curStatus.startsWith("1.0")) stColor="#5aa0b4";
               else if(u.curStatus.startsWith("1.0")) stColor="#c9a84c";
               else if(u.curStatus.startsWith("2.")) stColor="#4c9af0";
               else if(u.curStatus.startsWith("3.")) stColor="#b06cd0";
@@ -908,7 +908,7 @@ function UnitsTab(props){
                 var s=u.curStatus;
                 var style;
                 if(s.startsWith("1.")&&!s.startsWith("1.0"))
-                  style={background:"#fdf0f0",color:"#c94040",border:"1px solid #f5b8b8"};
+                  style={background:"#eef6f8",color:"#3d7f96",border:"1px solid #b4d6e0"};
                 else if(s.startsWith("1."))
                   style={background:"#fdf8ee",color:"#b07a20",border:"1px solid #e8d89a"};
                 else if(s.startsWith("2."))
@@ -1243,7 +1243,7 @@ function GanttTab(props){
           // Override colour and label from curStatus so all units at the same stage look identical
           if(u.curStatus && !u.curStatus.startsWith("NA")){
             stage = {pct:stage.pct, label:u.curStatus,
-              color: u.curStatus.startsWith("1.") && !u.curStatus.startsWith("1.0") ? "#e06060"
+              color: u.curStatus.startsWith("1.") && !u.curStatus.startsWith("1.0") ? "#5aa0b4"
                    : u.curStatus.startsWith("1.")  ? "#c9a84c"
                    : u.curStatus.startsWith("2.")  ? "#b06cd0"
                    : u.curStatus.startsWith("3.")  ? "#4caf82"

@@ -80,10 +80,10 @@ function Export-Data {
                 bespokeLot=$ws.Cells($r,(ColNum "T")).Value2; friendsFamily=$ws.Cells($r,(ColNum "U")).Value2
                 curStatus=$ws.Cells($r,(ColNum "Y")).Value2; brief=$ws.Cells($r,(ColNum "Z")).Value2
                 sketch=$ws.Cells($r,(ColNum "AA")).Value2
-                layoutApproved=$ws.Cells($r,(ColNum "AB")).Value2
-                costsIssued=$ws.Cells($r,(ColNum "AC")).Value2   # AC: 1.4 KEY MILESTONE: Layout and Cost Range Letter #1 Signed
-                feasibility=$ws.Cells($r,(ColNum "AD")).Value2   # AD: 1.2 Buildability Review
-                layoutDesign=$ws.Cells($r,(ColNum "AE")).Value2  # AE: 1.2.1 Layout Design Approved
+                layoutDesign=$ws.Cells($r,(ColNum "AB")).Value2  # AB: 1.2.1 Layout Approved
+                layoutApproved=$ws.Cells($r,(ColNum "AC")).Value2 # AC: 1.3 Letter #1 Issued: Cost Range and Layout Confirmed
+                costsIssued=$ws.Cells($r,(ColNum "AD")).Value2   # AD: 1.4 KEY MILESTONE: Layout and Cost Range Letter #1 Signed
+                feasibility=$ws.Cells($r,(ColNum "AE")).Value2   # AE: 1.2 Buildability Review
                 cad=$ws.Cells($r,(ColNum "AF")).Value2           # AF: 1.5 Sketch Layout Converted to CAD by Architect
                 qsEst=$ws.Cells($r,(ColNum "AG")).Value2         # AG: 1.7 Letter #2 Issued: Updated Cost Range and Interiors Confirmed
                 confirm=$ws.Cells($r,(ColNum "AH")).Value2       # AH: 1.8 KEY MILESTONE: Interiors and Cost Range Letter #2 Signed
