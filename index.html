@@ -1122,6 +1122,17 @@ function GanttTab(props){
     { key:"modApproval", label:"4.3 Mod Approval",        short:"Mod App",   color:"#4ecece",  phase:"delivery" },
   ];
 
+  // Critical steps — their diamonds turn a darker shade once achieved.
+  // 1.2.1, 1.4, 1.8 are ticked YES in the tracker. 2.2, 3.3 and 4.1 only have due dates in the tracker,
+  // so they show as critical but can't turn dark until the tracker records them as done.
+  var CRITICAL_STEPS = ["layoutDesign","costsIssued","confirm","qsCert","dovDeadline","hickory"];
+  function isCritical(k){ return CRITICAL_STEPS.indexOf(k) >= 0; }
+  function darken(hex, amt){
+    var n = parseInt(String(hex).replace("#","").slice(0,6),16);
+    var f = function(c){ return Math.round(c*(1-amt)).toString(16).padStart(2,"0"); };
+    return "#"+f((n>>16)&255)+f((n>>8)&255)+f(n&255);
+  }
+
   // Tracking steps (boolean) — shown as diamonds between contractual milestones
   // purchaser:true = purchaser-facing sign-off (filled diamond when done)
   // purchaser:false = internal Gurner activity (outline diamond when done)
@@ -1245,6 +1256,9 @@ function GanttTab(props){
       h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
         h("div",{style:{width:9,height:9,background:"#888",transform:"rotate(45deg)",flexShrink:0}}),
         h("span",null,"Tracking step — complete")),
+      h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
+        h("div",{style:{width:9,height:9,background:"#2a5584",transform:"rotate(45deg)",flexShrink:0}}),
+        h("span",null,"Critical step — achieved (1.2.1, 1.4, 1.8, 2.2, 3.3, 4.1)")),
       h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
         h("div",{style:{width:9,height:9,border:"2px solid #bbb5ad",transform:"rotate(45deg)",flexShrink:0,background:"transparent"}}),
         h("span",null,"Tracking step — pending")),
@@ -1521,7 +1535,12 @@ function GanttTab(props){
                   title:cs.label+": "+fmt2(u[cs.key])+" ("+dLabel+")",
                   style:{position:"absolute",left:x+"px",top:4,zIndex:3}},
                   // Vertical tick line — always phase colour
-                  h("div",{style:{width:1,height:ROW_H-12,background:cs.color+(isPast?"99":"bb")}})
+                  h("div",{style:{width:1,height:ROW_H-12,background:cs.color+(isPast?"99":"bb")}}),
+                  // Critical milestones (2.2, 3.3) also get an outline diamond on the line.
+                  // The tracker only holds their due dates, so they can't show as achieved yet.
+                  isCritical(cs.key) ? h("div",{style:{position:"absolute",left:-5,top:13,width:10,height:10,
+                    transform:"rotate(45deg)",background:"#fff",
+                    border:"2px solid "+darken(cs.color,0.45)+"99"}}) : null
                 );
               }),
 
@@ -1562,11 +1581,14 @@ function GanttTab(props){
                     var pct = (idx+1)/(visibleSteps.length+1);
                     var dx = x1 + span*pct;
                     var ys = YELLOW_STEPS.find(function(y){ return y.key===sk; });
+                    // Date-only steps hold a due date, not a completion, so they never show as done
                     var done = ys && ys.dateOnly ? false : !!u[sk];
                     var lbl = ys ? ys.label : sk;
                     var dc = ys ? ys.color : "#888";
+                    var crit = isCritical(sk);
+                    if(done && crit) dc = darken(dc, 0.45);   // achieved critical step → darker shade
                     var isPurchaser = ys ? ys.purchaser : false;
-                    var tooltipLabel = (done?"✓ ":"")+lbl;
+                    var tooltipLabel = (done?"✓ ":"")+lbl+(crit?" (critical)":"");
                     // Wrapper holds diamond + hover tooltip
                     diamonds.push(h("div",{key:sk,
                       style:{position:"absolute",left:(dx-6)+"px",top:"17px",zIndex:5},
