@@ -1178,9 +1178,17 @@ function GanttTab(props){
   var maxD = new Date("2028-04-30");
   var totalDays = Math.round((maxD - minD) / 86400000);
   // Fixed scale so future steps are spread out — scroll sideways to move through time
-  var DPX = 4;                       // pixels per day (about 120px per month)
-  var CHART_W = Math.round(totalDays * DPX);
-  function xp(d){ return d ? Math.round((new Date(d)-minD)/86400000*DPX) : null; }
+  // Time scale: the future is spread out (DPX px/day); the past before today is drawn
+  // at half that width so you don't have to scroll far back.
+  var DPX = 4;                       // pixels per day going forward (about 120px per month)
+  var DPX_PAST = DPX / 2;            // pixels per day before today (about 60px per month)
+  var pastDays = Math.max(0, (TODAY - minD) / 86400000);
+  var CHART_W = Math.round(pastDays * DPX_PAST + (totalDays - pastDays) * DPX);
+  function xp(d){
+    if(!d) return null;
+    var days = (new Date(d) - minD) / 86400000;
+    return Math.round(days <= pastDays ? days * DPX_PAST : pastDays * DPX_PAST + (days - pastDays) * DPX);
+  }
   var todayX = xp(TODAY);
   function fmtD(d){ return new Date(d).toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"2-digit"}); }
   function daysTo(d){ return Math.round((new Date(d)-TODAY)/86400000); }
@@ -1286,7 +1294,7 @@ function GanttTab(props){
   // Open the chart scrolled to about a month before today
   useEffect(function(){
     var el = document.getElementById("ganttScroll");
-    if(el) el.scrollLeft = Math.max(0, todayX - 30*DPX);
+    if(el) el.scrollLeft = Math.max(0, todayX - 60*DPX_PAST);
   }, []);
 
   // Faint vertical line at the start of each month
