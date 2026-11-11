@@ -1177,8 +1177,9 @@ function GanttTab(props){
   var minD = new Date("2026-10-01");
   var maxD = new Date("2028-04-30");
   var totalDays = Math.round((maxD - minD) / 86400000);
-  var CHART_W = Math.max(1100, window.innerWidth - LABEL_W - 56);
-  var DPX = CHART_W / totalDays;
+  // Fixed scale so future steps are spread out — scroll sideways to move through time
+  var DPX = 4;                       // pixels per day (about 120px per month)
+  var CHART_W = Math.round(totalDays * DPX);
   function xp(d){ return d ? Math.round((new Date(d)-minD)/86400000*DPX) : null; }
   var todayX = xp(TODAY);
   function fmtD(d){ return new Date(d).toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"2-digit"}); }
@@ -1193,7 +1194,7 @@ function GanttTab(props){
 
   // Diamond x positions: steps sharing a target sit side by side ending at that date,
   // and every diamond keeps at least MIN_GAP px from the one before (tooltips give the exact date).
-  var MIN_GAP = 15;
+  var MIN_GAP = 22;
   function layout(u){
     var groups = {};
     PROGRAMME.forEach(function(s){ var t=tgt(s,u); groups[t]=(groups[t]||0)+1; });
@@ -1249,6 +1250,21 @@ function GanttTab(props){
 
   var notBeforeSteps = PROGRAMME.filter(function(s){ return s.notBefore; });
 
+  // Open the chart scrolled to about a month before today
+  useEffect(function(){
+    var el = document.getElementById("ganttScroll");
+    if(el) el.scrollLeft = Math.max(0, todayX - 30*DPX);
+  }, []);
+
+  // Faint vertical line at the start of each month
+  function monthLines(){
+    return months.map(function(m,i){
+      return h("div",{key:"ml"+i,style:{position:"absolute",left:m.x+"px",top:0,bottom:0,width:1,background:"#efebe4",zIndex:0}});
+    });
+  }
+
+  var STICKY = {position:"sticky",left:0,background:"#fff",zIndex:20,alignSelf:"stretch",display:"flex"};
+
   return h("div", {style:{background:"#ffffff",border:"1px solid #e0dbd2",borderRadius:4,padding:20}},
 
     // Header
@@ -1302,24 +1318,27 @@ function GanttTab(props){
         h("div",{style:{width:2,height:13,background:"#e06060"}}), h("span",null,"Today"))
     ),
 
-    h("div",{style:{overflowX:"auto"}},
-      h("div",{style:{minWidth:(CHART_W+LABEL_W+8)+"px"}},
+    h("div",{id:"ganttScroll",style:{overflowX:"auto",border:"1px solid #ebe7e0",borderRadius:3}},
+      h("div",{style:{width:(CHART_W+LABEL_W+8)+"px"}},
 
         // Month row
-        h("div",{style:{marginLeft:LABEL_W+"px",position:"relative",height:20,borderBottom:"1px solid #ebe7e0",marginBottom:4}},
+        h("div",{style:{display:"flex",borderBottom:"1px solid #ebe7e0",marginBottom:4}},
+        h("div",{style:Object.assign({},STICKY,{width:LABEL_W+"px",flexShrink:0})}),
+        h("div",{style:{position:"relative",height:26,flex:1}},
           months.map(function(m,i){
-            return h("div",{key:i,style:{position:"absolute",left:m.x+"px",fontSize:9,color:"#bbb5ad",
-              letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap"}},m.label);
+            return h("div",{key:i,style:{position:"absolute",left:(m.x+4)+"px",top:6,fontSize:10,color:"#8a8278",
+              letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",borderLeft:"1px solid #e0dbd2",paddingLeft:4,marginLeft:-4}},m.label);
           }),
           h("div",{style:{position:"absolute",left:todayX+"px",top:0,height:"100%",width:1,background:"#e0606066"}})
-        ),
+        )),
 
         // Programme row — the master target dates
         h("div",{style:{display:"flex",alignItems:"center",marginBottom:8,paddingBottom:6,borderBottom:"2px solid #e0dbd2"}},
-          h("div",{style:{width:LABEL_W+"px",flexShrink:0,paddingRight:8}},
+          h("div",{style:Object.assign({},STICKY,{width:LABEL_W+"px",flexShrink:0,paddingRight:8,flexDirection:"column",justifyContent:"center"})},
             h("div",{style:{fontSize:12,fontWeight:600,color:"#2a2520"}},"Target programme"),
             h("div",{style:{fontSize:9,color:"#7a736a"}},"Applies to every bespoke unit · hover a diamond for its date")),
           h("div",{style:{position:"relative",height:ROW_H+"px",flex:1}},
+            monthLines(),
             bandsFor(null, 10, 36),
             BANDS.map(function(b){
               var to = typeof b.to === "string" ? b.to : b.to.S;
@@ -1334,13 +1353,16 @@ function GanttTab(props){
             notBeforeSteps.map(function(s){
               return h("div",{key:"nb"+s.key,title:s.n+" "+s.label+" — can't start before "+fmtD(s.notBefore),
                 style:{position:"absolute",left:xp(s.notBefore)+"px",top:0,height:ROW_H+"px",borderLeft:"2px dashed #8a6d3b",zIndex:3}},
-                h("div",{style:{position:"absolute",left:4,top:ROW_H-14,fontSize:8,color:"#8a6d3b",whiteSpace:"nowrap"}},
+                h("div",{style:{position:"absolute",left:4,top:-1,fontSize:8,color:"#8a6d3b",whiteSpace:"nowrap",background:"#fff",padding:"0 3px"}},
                   s.n+" not before "+fmtD(s.notBefore)));
             }),
             (function(){
               var pos = layout(null);
               return PROGRAMME.map(function(s){
-                return h(Diamond,{key:s.key,step:s,x:pos[s.key],top:36,date:tgt(s,null),status:"pending"});
+                return h("div",{key:s.key},
+                  h(Diamond,{step:s,x:pos[s.key],top:34,date:tgt(s,null),status:"pending"}),
+                  h("div",{style:{position:"absolute",left:pos[s.key]+"px",top:44,transform:"translateX(-50%)",fontSize:8,
+                    color:darken(PHASES[s.phase].color,0.35),whiteSpace:"nowrap",zIndex:4}},s.n));
               });
             })(),
             h("div",{style:{position:"absolute",left:todayX+"px",top:0,bottom:0,width:1,background:"#e06060",opacity:0.5,zIndex:10}})
@@ -1368,7 +1390,7 @@ function GanttTab(props){
               borderBottom:"1px solid #e8e3da",paddingBottom:4,overflow:"visible"}},
 
             // LEFT LABEL
-            h("div",{style:{width:LABEL_W+"px",flexShrink:0,paddingRight:6,display:"flex",alignItems:"center",gap:5}},
+            h("div",{style:Object.assign({},STICKY,{width:LABEL_W+"px",flexShrink:0,paddingRight:6,alignItems:"center",gap:5})},
               h("button",{onClick:function(){onOpen(u);},title:"Full detail",
                 style:{background:"#f0ede8",border:"1px solid #e0dbd2",color:"#6a6058",borderRadius:2,cursor:"pointer",
                   width:22,height:22,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0}},"⊕"),
@@ -1404,6 +1426,7 @@ function GanttTab(props){
 
             // CHART AREA
             h("div",{style:{position:"relative",height:ROW_H+"px",flex:1,overflow:"visible"}},
+              monthLines(),
               bandsFor(u, 12, 32),
               notBeforeSteps.map(function(s){
                 return h("div",{key:"nb"+s.key,style:{position:"absolute",left:xp(s.notBefore)+"px",top:6,height:(ROW_H-12)+"px",
