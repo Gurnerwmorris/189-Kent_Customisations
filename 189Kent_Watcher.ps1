@@ -146,6 +146,12 @@ function Export-Data {
             $comma = if ($i -lt $rows.Count-1) {","} else {""}
             $bespoke = if ("$($u.bespokeLot)".Trim().ToUpper() -eq "YES") {"true"} else {"false"}
             $exchDate = if ($u.status -eq "EXCHANGED") {XlDate $u.exchanged} else {XlDate $u.dateIssued}
+            # Steps marked "ON HOLD" in the tracker (the dashboard treats that step and every later step as not done)
+            $holdKeys = @()
+            foreach ($k in @("sketch","layoutDesign","layoutApproved","costsIssued","cad","qsEst","confirm","builder","commercial","dovApproval")) {
+                if ("$($u.$k)".Trim().ToUpper().StartsWith("ON HOLD")) { $holdKeys += $k }
+            }
+            $holdSteps = if ($holdKeys.Count) { '"' + ($holdKeys -join ',') + '"' } else { "null" }
             $line = "  {unit:$(XlStr $u.unit),name:$(XlStr $u.name),agent:$(XlStr $u.agent)," +
                     "status:$(XlStr $u.status),price:$(XlNum $u.price),bespoke:$bespoke," +
                     "exchanged:$exchDate,spec:$(XlStr $u.spec),colour:$(XlStr $u.colour)," +
@@ -160,7 +166,7 @@ function Export-Data {
                     "costsIssued:$(XlBool $u.costsIssued)," +
                     "layoutDesign:$(XlBool $u.layoutDesign),cad:$(XlBool $u.cad),qsEst:$(XlBool $u.qsEst),confirm:$(XlBool $u.confirm)," +
                     "builder:$(XlBool $u.builder),commercial:$(XlBool $u.commercial)," +
-                    "dovApproval:$(XlBool $u.dovApproval),bic:$(XlStr $u.bic)," +
+                    "dovApproval:$(XlBool $u.dovApproval),holdSteps:$holdSteps,bic:$(XlStr $u.bic)," +
                     "lead:$(XlStr $u.lead),nextSteps:$(XlStr $u.nextSteps)," +
                     "correspondence:$(XlStr $u.correspondence)," +
                     "bespokeLink:$(XlStr $u.bespokeLink)}$comma"

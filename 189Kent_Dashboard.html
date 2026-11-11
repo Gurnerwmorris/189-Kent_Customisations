@@ -292,6 +292,22 @@ UNITS = UNITS.filter(function(u){
   return HIDDEN_UNITS.indexOf(String(u.unit||"").trim().toUpperCase()) < 0;
 });
 
+// Steps marked ON HOLD in the tracker: that step and every later step count as not done,
+// even if a later column says YES (e.g. 2501S has 1.2.1 on hold, so its 1.3 can't be complete).
+var STEP_ORDER = ["sketch","layoutDesign","layoutApproved","costsIssued","cad","qsEst","confirm","builder","commercial","dovApproval"];
+var STEP_NAMES = {sketch:"1.2 Sketch Plan",layoutDesign:"1.2.1 Layout Approved",layoutApproved:"1.3 Letter #1 Issued",
+  costsIssued:"1.4 Letter #1 Signed",cad:"1.5 CAD",qsEst:"1.6 Letter #2 Issued",confirm:"1.7 Letter #2 Signed",
+  builder:"2.1 Builder Pricing",commercial:"2.3 Commercial Review",dovApproval:"3.1 Internal DoV Approval"};
+UNITS.forEach(function(u){
+  if(!u.holdSteps) return;
+  var held = String(u.holdSteps).split(",");
+  var first = STEP_ORDER.filter(function(k){ return held.indexOf(k) >= 0; })[0];
+  if(!first) return;
+  u.onHold = first;
+  STEP_ORDER.slice(STEP_ORDER.indexOf(first)).forEach(function(k){ u[k] = false; });
+  u.curStatus = "On hold — " + STEP_NAMES[first];
+});
+
 // Next Steps cells keep a history of notes. Show only the latest one everywhere on the dashboard.
 UNITS.forEach(function(u){
   var n = latestNote(u.nextSteps);
@@ -1249,6 +1265,7 @@ function GanttTab(props){
     var fill = "transparent", border, size = s.purchaser ? 13 : 11, shadow = "none";
     if(st==="done"){ var c = s.critical ? CRITICAL_COL : col; fill = c; border = "2px solid "+c; shadow = "0 0 4px "+c+"55"; }
     else if(st==="overdue"){ border = "2px solid #c94040"; fill = "#fdecec"; }
+    else if(st==="hold"){ border = "2px solid #a39e96"; fill = "repeating-linear-gradient(45deg,#e8e4dd 0 2px,#fff 2px 4px)"; }
     else if(s.dateOnly){ border = "1px dashed "+col+"aa"; }
     else { border = (s.critical ? "2px solid "+darken(col,0.35) : "2px solid "+col+"99"); fill = "#fff"; }
     return h("div",{className:"gd",style:{position:"absolute",left:(p.x-size/2)+"px",top:(p.top-size/2)+"px",zIndex:5},
@@ -1263,7 +1280,7 @@ function GanttTab(props){
         st==="done" && p.estimated
           ? h("div",null,"Done — shown at about "+fmtD(p.date)+" (estimated; the tracker has no completion date)")
           : h("div",null,"Target: "+fmtD(p.date)+(s.tbc?" (Level 7 — higher floors later)":"")+
-              (st==="done" ? " · done" : st==="overdue" ? " · OVERDUE "+Math.abs(daysTo(p.date))+"d" : " · in "+daysTo(p.date)+"d")),
+              (st==="done" ? " · done" : st==="hold" ? " · ON HOLD" : st==="overdue" ? " · OVERDUE "+Math.abs(daysTo(p.date))+"d" : " · in "+daysTo(p.date)+"d")),
         st==="done" && p.estimated ? h("div",{style:{color:"#bbb5ad"}},"Programme target was "+fmtD(p.target)) : null,
         s.notBefore ? h("div",null,"Can't start before "+fmtD(s.notBefore)) : null,
         s.dateOnly && st!=="done" ? h("div",{style:{color:"#bbb5ad"}},"No YES tick in tracker for this step") : null)
@@ -1271,6 +1288,8 @@ function GanttTab(props){
   }
 
   function statusOf(s,u){
+    if(u && u.onHold && STEP_ORDER.indexOf(s.key) >= STEP_ORDER.indexOf(u.onHold)) return "hold";
+    if(u && u.onHold && !stepDone(s,u)) return "hold";   // everything after a hold waits too
     if(stepDone(s,u)) return "done";
     if(new Date(tgt(s,u)) < TODAY) return "overdue";
     return "pending";
@@ -1426,6 +1445,7 @@ function GanttTab(props){
           // Next step not yet done (ticked steps only count as done)
           var nextStep = PROGRAMME.filter(function(s){ return !stepDone(s,u); })[0];
           var overdueCount = PROGRAMME.filter(function(s){ return statusOf(s,u)==="overdue"; }).length;
+          var onHold = !!u.onHold;
 
           return h("div",{key:u.unit,style:{display:"flex",alignItems:"center",marginBottom:6,
               borderBottom:"1px solid #e8e3da",paddingBottom:4,overflow:"visible"}},
@@ -1442,9 +1462,9 @@ function GanttTab(props){
                     h(BicBadge,{bic:u.bic})),
                   nextStep ? h("span",{title:"Next step: "+nextStep.n+" "+nextStep.label+" — target "+fmtD(tgt(nextStep,u)),
                     style:{fontSize:8,padding:"1px 4px",borderRadius:2,whiteSpace:"nowrap",
-                      background:overdueCount?"#c9404018":"#4c9af015",color:overdueCount?"#c94040":"#3a7acc",
-                      border:"1px solid "+(overdueCount?"#c9404044":"#4c9af044")}},
-                    overdueCount ? overdueCount+" overdue" : "Next "+nextStep.n+" · "+fmtD(tgt(nextStep,u))) : null
+                      background:onHold?"#a39e9618":overdueCount?"#c9404018":"#4c9af015",color:onHold?"#6a6560":overdueCount?"#c94040":"#3a7acc",
+                      border:"1px solid "+(onHold?"#a39e9666":overdueCount?"#c9404044":"#4c9af044")}},
+                    onHold ? "On hold" : overdueCount ? overdueCount+" overdue" : "Next "+nextStep.n+" · "+fmtD(tgt(nextStep,u))) : null
                 ),
                 h("div",{style:{fontSize:9,color:"#7a736a",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginBottom:1}},u.name),
                 h("div",{style:{fontSize:9,color:stage.color,letterSpacing:"0.03em",lineHeight:1.3,whiteSpace:"normal"}},stage.label)
