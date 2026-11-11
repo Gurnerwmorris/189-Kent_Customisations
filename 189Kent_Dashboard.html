@@ -1178,10 +1178,10 @@ function GanttTab(props){
   var maxD = new Date("2028-04-30");
   var totalDays = Math.round((maxD - minD) / 86400000);
   // Fixed scale so future steps are spread out — scroll sideways to move through time
-  // Time scale: the future is spread out (DPX px/day); the past before today is drawn
-  // at half that width so you don't have to scroll far back.
-  var DPX = 4;                       // pixels per day going forward (about 120px per month)
-  var DPX_PAST = DPX / 2;            // pixels per day before today (about 60px per month)
+  // Time scale: every month is the same width (about 60px).
+  // DPX_PAST lets the time before today be drawn narrower if ever needed.
+  var DPX = 2;                       // pixels per day (about 60px per month)
+  var DPX_PAST = DPX;                // same scale before today (change to DPX / 2 to squeeze the past)
   var pastDays = Math.max(0, (TODAY - minD) / 86400000);
   var CHART_W = Math.round(pastDays * DPX_PAST + (totalDays - pastDays) * DPX);
   function xp(d){
@@ -1202,7 +1202,7 @@ function GanttTab(props){
 
   // Diamond x positions: steps sharing a target sit side by side ending at that date,
   // and every diamond keeps at least MIN_GAP px from the one before (tooltips give the exact date).
-  var MIN_GAP = 22;
+  var MIN_GAP = 16;
   // Done steps must have happened before today, but the tracker has no completion dates.
   // Estimate them: spread the unit's done steps evenly, in order, from its design start
   // (brief date, or 2 weeks after exchange) up to 2 weeks before today.
