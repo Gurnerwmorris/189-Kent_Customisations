@@ -313,9 +313,9 @@ var ALL_MILESTONES = [
   {key:"layoutApproved",    label:"1.3 Letter #1 Issued: Cost Range and Layout Confirmed", group:"design", isBool:true, color:"#4c9af0"},
   {key:"costsIssued",       label:"1.4 KEY MILESTONE: Layout and Cost Range Letter #1 Signed", group:"design", isBool:true, color:"#4c9af0"},
   {key:"cad",               label:"1.5 Sketch Layout Converted to CAD by Architect", group:"design", isBool:true, color:"#4c9af0"},
-  {key:"qsEst",             label:"1.7 Letter #2 Issued: Updated Cost Range and Interiors Confirmed", group:"design", isBool:true, color:"#4c9af0"},
-  {key:"confirm",           label:"1.8 KEY MILESTONE: Interiors and Cost Range Letter #2 Signed", group:"design", isBool:true, color:"#4c9af0"},
-  {key:"designEnd",         label:"1.9 Move to Phase 2 – COST",                group:"design",   isBool:false, color:"#4c9af0"},
+  {key:"qsEst",             label:"1.6 Letter #2 Issued: Updated Cost Range and Interiors Confirmed", group:"design", isBool:true, color:"#4c9af0"},
+  {key:"confirm",           label:"1.7 KEY MILESTONE: Interiors and Cost Range Letter #2 Signed", group:"design", isBool:true, color:"#4c9af0"},
+  {key:"designEnd",         label:"1.8 Move to Phase 2 – COST",                group:"design",   isBool:false, color:"#4c9af0"},
   // Phase 2 — Cost
   {key:"builder",           label:"2.1 Builder Pricing",                       group:"cost",     isBool:true,  color:"#b06cd0"},
   {key:"commercial",        label:"2.3 Internal Commercial Review",            group:"cost",     isBool:true,  color:"#b06cd0"},
@@ -372,8 +372,8 @@ function latestNote(s){
 function onGanttAnyway(u){ return GANTT_ALSO_INCLUDE.indexOf(String(u.unit||"").trim().toUpperCase()) >= 0; }
 
 function getStage(u){
-  if(u.confirm)      return {label:"1.8 Letter #2 Signed",                  pct:85, color:"#4caf82"};
-  if(u.qsEst)        return {label:"1.7 Letter #2 Issued",                  pct:72, color:"#4caf82"};
+  if(u.confirm)      return {label:"1.7 Letter #2 Signed",                  pct:85, color:"#4caf82"};
+  if(u.qsEst)        return {label:"1.6 Letter #2 Issued",                  pct:72, color:"#4caf82"};
   if(u.cad)          return {label:"1.5 CAD Plans Issued",                  pct:60, color:"#4caf82"};
   if(u.costsIssued)  return {label:"1.4 Letter #1 Signed",                  pct:35, color:"#c9a84c"};
   if(u.layoutApproved) return {label:"1.3 Letter #1 Issued",                pct:25, color:"#c9a84c"};
@@ -1031,9 +1031,9 @@ function PhasesTab(){
       {n:"1.3", contract:false,label:"Letter #1 Issued: Cost Range and Layout Confirmed", clause:"Gurner Short Form — Phase 2", timing:"After Sketch Planning complete", desc:"Letter issued to purchaser with preliminary cost range and confirmed layout for sign off."},
       {n:"1.4", contract:true, label:"KEY MILESTONE: Layout and Cost Range Letter #1 Signed", clause:"Gurner Short Form — Phase 2", timing:"After Sketch Planning complete", desc:"Purchaser countersigns Letter #1 confirming layout is approved. No further layout changes accepted after this point."},
       {n:"1.5", contract:false,label:"Sketch Layout Converted to CAD by Architect", clause:"Gurner Short Form — Phase 4/5", timing:"Immediately after Consultant review", desc:"Architect issues CAD plans incorporating agreed bespoke works for QS pricing."},
-      {n:"1.7", contract:false,label:"Letter #2 Issued: Updated Cost Range and Interiors Confirmed", clause:"Gurner Short Form — Phase 5", timing:"During design period", desc:"Updated cost range and interiors selections issued to purchaser for sign off."},
-      {n:"1.8", contract:true, label:"KEY MILESTONE: Interiors and Cost Range Letter #2 Signed", clause:"Gurner Short Form — Phase 5", timing:"After QS estimate", desc:"Purchaser countersigns Letter #2 confirming interiors and updated cost range."},
-      {n:"1.9", contract:true, label:"Move to Phase 2 – COST",                      clause:"SC 68(b)(ii)(D)",    timing:"150 days after COS Date", desc:"End of the 150-day bespoke design period. Vendor may determine amendments unilaterally if no agreement reached by this date (SC 68(b)(ii)(F))."},
+      {n:"1.6", contract:false,label:"Letter #2 Issued: Updated Cost Range and Interiors Confirmed", clause:"Gurner Short Form — Phase 5", timing:"During design period", desc:"Updated cost range and interiors selections issued to purchaser for sign off."},
+      {n:"1.7", contract:true, label:"KEY MILESTONE: Interiors and Cost Range Letter #2 Signed", clause:"Gurner Short Form — Phase 5", timing:"After QS estimate", desc:"Purchaser countersigns Letter #2 confirming interiors and updated cost range."},
+      {n:"1.8", contract:true, label:"Move to Phase 2 – COST",                      clause:"SC 68(b)(ii)(D)",    timing:"150 days after COS Date", desc:"End of the 150-day bespoke design period. Vendor may determine amendments unilaterally if no agreement reached by this date (SC 68(b)(ii)(F))."},
     ]},
     {color:"#b06cd0",phase:"Phase 2 — Cost",steps:"Post design agreement (~3 months)",milestones:[
       {n:"2.1", contract:false,label:"Builder Pricing",                            clause:"Gurner Internal",   timing:"Post design agreement", desc:"Builder provides budget variation pricing and constructability input."},
@@ -1115,7 +1115,7 @@ function GanttTab(props){
   var CONTRACT_STEPS = [
     { key:"exchanged",   label:"Contract Exchanged",      short:"Exchanged", color:"#4c9af0",  phase:"design"   },
     { key:"brief",       label:"1.0 Brief Due",           short:"Brief",     color:"#4c9af0",  phase:"design",   noTick:true },
-    { key:"designEnd",   label:"1.9 Move to Phase 2",     short:"Design End",color:"#4c9af0",  phase:"design"   },
+    { key:"designEnd",   label:"1.8 Move to Phase 2",     short:"Design End",color:"#4c9af0",  phase:"design"   },
     { key:"qsCert",      label:"2.2 QS Certification",   short:"QS Cert",   color:"#b06cd0",  phase:"cost"     },
     { key:"dovIssue",    label:"3.2 DoV Issued",          short:"DoV Issue", color:"#4caf82",  phase:"legal",    noTick:true },
     { key:"dovDeadline", label:"3.3 DoV Executed",        short:"DoV Sign",  color:"#4caf82",  phase:"legal"    },
@@ -1123,7 +1123,7 @@ function GanttTab(props){
   ];
 
   // Critical steps — their diamonds turn a darker shade once achieved.
-  // 1.2.1, 1.4, 1.8 are ticked YES in the tracker. 2.2, 3.3 and 4.1 only have due dates in the tracker,
+  // 1.2.1, 1.4, 1.7 are ticked YES in the tracker. 2.2, 3.3 and 4.1 only have due dates in the tracker,
   // so they show as critical but can't turn dark until the tracker records them as done.
   var CRITICAL_STEPS = ["layoutDesign","costsIssued","confirm","qsCert","dovDeadline","hickory"];
   function isCritical(k){ return CRITICAL_STEPS.indexOf(k) >= 0; }
@@ -1142,8 +1142,8 @@ function GanttTab(props){
     { key:"layoutApproved", label:"1.3 Letter #1 Issued: Cost Range and Layout Confirmed", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true },
     { key:"costsIssued",    label:"1.4 KEY MILESTONE: Layout and Cost Range Letter #1 Signed", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true },
     { key:"cad",            label:"1.5 Sketch Layout Converted to CAD by Architect", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
-    { key:"qsEst",          label:"1.7 Letter #2 Issued: Updated Cost Range and Interiors Confirmed", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
-    { key:"confirm",        label:"1.8 KEY MILESTONE: Interiors and Cost Range Letter #2 Signed", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true },
+    { key:"qsEst",          label:"1.6 Letter #2 Issued: Updated Cost Range and Interiors Confirmed", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:false },
+    { key:"confirm",        label:"1.7 KEY MILESTONE: Interiors and Cost Range Letter #2 Signed", leadsTo:"designEnd", color:"#4c9af0", phase:"design", purchaser:true },
     { key:"builder",        label:"2.1 Builder Pricing",                             leadsTo:"qsCert",    color:"#b06cd0", phase:"cost",   purchaser:false },
     { key:"commercial",     label:"2.3 Internal Commercial Review",                  leadsTo:"qsCert",    color:"#b06cd0", phase:"cost",   purchaser:false },
     { key:"dovApproval",    label:"3.1 Internal DoV Approval",                       leadsTo:"dovIssue",  color:"#4caf82", phase:"legal",    purchaser:false },
@@ -1258,7 +1258,7 @@ function GanttTab(props){
         h("span",null,"Tracking step — complete")),
       h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
         h("div",{style:{width:9,height:9,background:"#2a5584",transform:"rotate(45deg)",flexShrink:0}}),
-        h("span",null,"Critical step — achieved (1.2.1, 1.4, 1.8, 2.2, 3.3, 4.1)")),
+        h("span",null,"Critical step — achieved (1.2.1, 1.4, 1.7, 2.2, 3.3, 4.1)")),
       h("div",{style:{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#4a4540"}},
         h("div",{style:{width:9,height:9,border:"2px solid #bbb5ad",transform:"rotate(45deg)",flexShrink:0,background:"transparent"}}),
         h("span",null,"Tracking step — pending")),

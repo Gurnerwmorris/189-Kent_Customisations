@@ -84,9 +84,9 @@ function Export-Data {
                 layoutApproved=$ws.Cells($r,(ColNum "AC")).Value2 # AC: 1.3 Letter #1 Issued: Cost Range and Layout Confirmed
                 costsIssued=$ws.Cells($r,(ColNum "AD")).Value2   # AD: 1.4 KEY MILESTONE: Layout and Cost Range Letter #1 Signed
                 cad=$ws.Cells($r,(ColNum "AF")).Value2           # AF: 1.5 Sketch Layout Converted to CAD by Architect
-                qsEst=$ws.Cells($r,(ColNum "AG")).Value2         # AG: 1.7 Letter #2 Issued: Updated Cost Range and Interiors Confirmed
-                confirm=$ws.Cells($r,(ColNum "AH")).Value2       # AH: 1.8 KEY MILESTONE: Interiors and Cost Range Letter #2 Signed
-                designEnd=$ws.Cells($r,(ColNum "AI")).Value2     # AI: 1.9 Move to Phase 2 - COST (150 days after COS date)
+                qsEst=$ws.Cells($r,(ColNum "AG")).Value2         # AG: 1.6 Letter #2 Issued: Updated Cost Range and Interiors Confirmed
+                confirm=$ws.Cells($r,(ColNum "AH")).Value2       # AH: 1.7 KEY MILESTONE: Interiors and Cost Range Letter #2 Signed
+                designEnd=$ws.Cells($r,(ColNum "AI")).Value2     # AI: 1.8 Move to Phase 2 - COST (150 days after COS date)
                 builder=$ws.Cells($r,(ColNum "AJ")).Value2       # AJ: 2.1 Builder Pricing
                 commercial=$ws.Cells($r,(ColNum "AK")).Value2    # AK: 2.3 Internal Commercial Review
                 qsCert=$ws.Cells($r,(ColNum "AL")).Value2        # AL: 2.2 QS Cost Certification
