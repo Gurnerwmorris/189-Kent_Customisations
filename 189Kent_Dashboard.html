@@ -1194,10 +1194,10 @@ function GanttTab(props){
   var maxD = new Date("2028-04-30");
   var totalDays = Math.round((maxD - minD) / 86400000);
   // Fixed scale so future steps are spread out — scroll sideways to move through time
-  // Time scale: every month is the same width (about 60px).
-  // DPX_PAST lets the time before today be drawn narrower if ever needed.
+  // Time scale: months from today on are about 60px wide; months before today are half that,
+  // so there is less history to scroll past.
   var DPX = 2;                       // pixels per day (about 60px per month)
-  var DPX_PAST = DPX;                // same scale before today (change to DPX / 2 to squeeze the past)
+  var DPX_PAST = DPX / 2;            // pixels per day before today (about 30px per month)
   var pastDays = Math.max(0, (TODAY - minD) / 86400000);
   var CHART_W = Math.round(pastDays * DPX_PAST + (totalDays - pastDays) * DPX);
   function xp(d){
@@ -1212,13 +1212,16 @@ function GanttTab(props){
   var months = [];
   var mc = new Date(minD.getFullYear(),minD.getMonth(),1);
   while(mc <= maxD){
-    months.push({ label: mc.toLocaleDateString("en-AU",{month:"short",year:"2-digit"}), x: xp(mc) });
+    // Months before today are narrow, so show just the month (with the year on January)
+    var past = mc < new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+    months.push({ label: past ? (mc.getMonth()===0 ? "Jan "+String(mc.getFullYear()).slice(2) : mc.toLocaleDateString("en-AU",{month:"short"}).slice(0,3))
+                              : mc.toLocaleDateString("en-AU",{month:"short",year:"2-digit"}), x: xp(mc), past: past });
     mc = new Date(mc.getFullYear(),mc.getMonth()+1,1);
   }
 
   // Diamond x positions: steps sharing a target sit side by side ending at that date,
   // and every diamond keeps at least MIN_GAP px from the one before (tooltips give the exact date).
-  var MIN_GAP = 16;
+  var MIN_GAP = 14;
   // Done steps must have happened before today, but the tracker has no completion dates.
   // Estimate them: spread the unit's done steps evenly, in order, from its design start
   // (brief date, or 2 weeks after exchange) up to 2 weeks before today.
@@ -1386,7 +1389,7 @@ function GanttTab(props){
         h("div",{style:Object.assign({},STICKY,{width:LABEL_W+"px",flexShrink:0})}),
         h("div",{style:{position:"relative",height:26,flex:1}},
           months.map(function(m,i){
-            return h("div",{key:i,style:{position:"absolute",left:(m.x+4)+"px",top:6,fontSize:10,color:"#8a8278",
+            return h("div",{key:i,style:{position:"absolute",left:(m.x+4)+"px",top:6,fontSize:m.past?8:10,color:m.past?"#aaa39a":"#8a8278",
               letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",borderLeft:"1px solid #e0dbd2",paddingLeft:4,marginLeft:-4}},m.label);
           }),
           h("div",{style:{position:"absolute",left:todayX+"px",top:0,height:"100%",width:1,background:"#e0606066"}})
