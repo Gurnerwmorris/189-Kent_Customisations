@@ -1174,7 +1174,7 @@ function GanttTab(props){
   var ROW_H   = 56;
 
   // Timeline: Oct 2026 → Apr 2028
-  var minD = new Date("2026-10-01");
+  var minD = new Date("2025-09-01");   // early enough to show completed steps
   var maxD = new Date("2028-04-30");
   var totalDays = Math.round((maxD - minD) / 86400000);
   // Fixed scale so future steps are spread out — scroll sideways to move through time
@@ -1195,16 +1195,44 @@ function GanttTab(props){
   // Diamond x positions: steps sharing a target sit side by side ending at that date,
   // and every diamond keeps at least MIN_GAP px from the one before (tooltips give the exact date).
   var MIN_GAP = 22;
+  // Done steps must have happened before today, but the tracker has no completion dates.
+  // Estimate them: spread the unit's done steps evenly, in order, from its design start
+  // (brief date, or 2 weeks after exchange) up to 2 weeks before today.
+  var DAY = 86400000;
+  function doneDates(u){
+    var out = {};
+    if(!u) return out;
+    var done = PROGRAMME.filter(function(s){ return stepDone(s,u); });
+    if(!done.length) return out;
+    var end = new Date(TODAY.getTime() - 14*DAY);
+    var start = u.brief && new Date(u.brief) < end ? new Date(u.brief)
+              : u.exchanged ? new Date(new Date(u.exchanged).getTime() + 14*DAY)
+              : new Date(end.getTime() - 120*DAY);
+    if(start >= end) start = new Date(end.getTime() - 30*DAY);
+    var span = end - start;
+    done.forEach(function(s,i){
+      out[s.key] = new Date(start.getTime() + span*(i+1)/(done.length+1)).toISOString().slice(0,10);
+    });
+    return out;
+  }
+
+  // Diamond x positions. Done steps sit at their estimated dates (before today).
+  // Pending steps sit at their targets: steps sharing a target sit side by side ending at that date,
+  // and every diamond keeps at least MIN_GAP px from the one before (tooltips give the exact date).
   function layout(u){
+    var dd = doneDates(u);
+    var pending = PROGRAMME.filter(function(s){ return !dd[s.key]; });
     var groups = {};
-    PROGRAMME.forEach(function(s){ var t=tgt(s,u); groups[t]=(groups[t]||0)+1; });
+    pending.forEach(function(s){ var t=tgt(s,u); groups[t]=(groups[t]||0)+1; });
     var seen = {}, prev = -Infinity, out = {};
     PROGRAMME.forEach(function(s){
+      if(dd[s.key]){ var dx = Math.max(xp(dd[s.key]), prev + MIN_GAP); out[s.key] = dx; prev = dx; return; }
       var t = tgt(s,u); seen[t]=(seen[t]||0)+1;
       var ideal = xp(t) - (groups[t]-seen[t])*MIN_GAP;
       var x = Math.max(ideal, prev + MIN_GAP);
       out[s.key] = x; prev = x;
     });
+    out._done = dd;
     return out;
   }
 
@@ -1224,8 +1252,11 @@ function GanttTab(props){
         background:"#1e1c19",color:"#f0ede8",padding:"4px 8px",borderRadius:3,fontSize:9,whiteSpace:"nowrap",
         boxShadow:"0 2px 6px rgba(0,0,0,0.4)",pointerEvents:"none",zIndex:30,borderLeft:"2px solid "+col,lineHeight:1.45}},
         h("div",{style:{fontWeight:600}},(st==="done"?"✓ ":"")+s.n+" "+s.label+(s.critical?" (critical)":"")),
-        h("div",null,"Target: "+fmtD(p.date)+(s.tbc?" (Level 7 — higher floors later)":"")+
-          (st==="done" ? " · done" : st==="overdue" ? " · OVERDUE "+Math.abs(daysTo(p.date))+"d" : " · in "+daysTo(p.date)+"d")),
+        st==="done" && p.estimated
+          ? h("div",null,"Done — shown at about "+fmtD(p.date)+" (estimated; the tracker has no completion date)")
+          : h("div",null,"Target: "+fmtD(p.date)+(s.tbc?" (Level 7 — higher floors later)":"")+
+              (st==="done" ? " · done" : st==="overdue" ? " · OVERDUE "+Math.abs(daysTo(p.date))+"d" : " · in "+daysTo(p.date)+"d")),
+        st==="done" && p.estimated ? h("div",{style:{color:"#bbb5ad"}},"Programme target was "+fmtD(p.target)) : null,
         s.notBefore ? h("div",null,"Can't start before "+fmtD(s.notBefore)) : null,
         s.dateOnly && st!=="done" ? h("div",{style:{color:"#bbb5ad"}},"No YES tick in tracker for this step") : null)
     );
@@ -1240,8 +1271,10 @@ function GanttTab(props){
   function bandsFor(u, top, height){
     return BANDS.map(function(b){
       var to = typeof b.to === "string" ? b.to : b.to[u ? towerOf(u) : "S"];
-      var x1 = xp(b.from), x2 = xp(to), col = PHASES[b.phase].color;
-      return h("div",{key:b.phase,title:PHASES[b.phase].label+": "+fmtD(b.from)+" – "+fmtD(to)+(b.note?" · "+b.note:""),
+      // Each unit's design phase starts at its own brief date (or exchange), not the programme start
+      var from = b.phase==="design" && u ? (u.brief || u.exchanged || b.from) : b.from;
+      var x1 = xp(from), x2 = xp(to), col = PHASES[b.phase].color;
+      return h("div",{key:b.phase,title:PHASES[b.phase].label+": "+fmtD(from)+" – "+fmtD(to)+(b.note?" · "+b.note:""),
         style:{position:"absolute",left:x1+"px",width:Math.max(x2-x1,2)+"px",top:top+"px",height:height+"px",
           background:b.phase==="build" ? "repeating-linear-gradient(45deg,"+col+"10 0 6px,"+col+"22 6px 12px)" : col+"12",
           border:"1px solid "+col+"33",borderRadius:2,zIndex:0}});
@@ -1433,7 +1466,8 @@ function GanttTab(props){
                   borderLeft:"1px dashed #8a6d3b88",zIndex:2}});
               }),
               PROGRAMME.map(function(s){
-                return h(Diamond,{key:s.key,step:s,x:pos[s.key],top:28,date:tgt(s,u),status:statusOf(s,u)});
+                var est = pos._done[s.key];
+                return h(Diamond,{key:s.key,step:s,x:pos[s.key],top:28,date:est||tgt(s,u),target:tgt(s,u),estimated:!!est,status:statusOf(s,u)});
               }),
               h("div",{style:{position:"absolute",left:todayX+"px",top:0,bottom:0,width:1,background:"#e06060",opacity:0.5,zIndex:10}})
             )
