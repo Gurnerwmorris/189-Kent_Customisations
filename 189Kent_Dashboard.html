@@ -1133,7 +1133,7 @@ function GanttTab(props){
     {key:"layoutDesign",   n:"1.2.1", phase:"design", target:"2027-02-04", label:"Layout Approved", critical:true},
     {key:"layoutApproved", n:"1.3",   phase:"design", target:"2027-02-04", label:"Letter #1 Issued: cost range and layout", purchaser:true},
     {key:"costsIssued",    n:"1.4",   phase:"design", target:"2027-02-04", label:"Letter #1 Signed / layout approved (outstanding approvals)", critical:true, purchaser:true},
-    {key:"cad",            n:"1.5",   phase:"design", target:"2027-02-09", label:"Layout converted to CAD / revised interiors and joinery package"},
+    {key:"cad",            n:"1.5",   phase:"design", target:"2026-11-30", label:"Layout converted to CAD / revised interiors and joinery package"},
     {key:"qsEst",          n:"1.6",   phase:"design", target:"2027-02-23", notBefore:"2026-12-31", label:"Letter #2 Issued: interiors and updated cost range"},
     {key:"confirm",        n:"1.7",   phase:"design", target:"2027-03-09", label:"Letter #2 Signed: interiors and updated cost range agreed", critical:true, purchaser:true},
     {key:"designEnd",      n:"1.8",   phase:"design", target:"2027-03-10", label:"Move to Phase 2 / Cost (working target; contractual deadline remains COS-dependent)", dateOnly:true},
@@ -1252,7 +1252,13 @@ function GanttTab(props){
     var groups = {};
     pending.forEach(function(s){ var t=tgt(s,u); groups[t]=(groups[t]||0)+1; });
     var seen = {}, prev = -Infinity, out = {};
-    PROGRAMME.forEach(function(s){
+    // Done steps first (in step order), then pending steps in date order — a step can be
+    // targeted earlier than steps numbered before it (e.g. 1.5 CAD before the 1.2–1.4 approvals)
+    var doneSteps = PROGRAMME.filter(function(s){ return dd[s.key]; });
+    var order = pending.map(function(s,i){ return {s:s,i:i}; }).sort(function(a,b){
+      var d = new Date(tgt(a.s,u)) - new Date(tgt(b.s,u)); return d || a.i - b.i;
+    }).map(function(o){ return o.s; });
+    doneSteps.concat(order).forEach(function(s){
       if(dd[s.key]){ var dx = Math.max(xp(dd[s.key]), prev + MIN_GAP); out[s.key] = dx; prev = dx; return; }
       var t = tgt(s,u); seen[t]=(seen[t]||0)+1;
       var ideal = xp(t) - (groups[t]-seen[t])*MIN_GAP;
@@ -1345,7 +1351,7 @@ function GanttTab(props){
     // Phase summary strip
     h("div",{style:{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8,margin:"10px 0 14px"}},
       [
-        {p:"design",  when:"to 10 Mar 27", steps:"Layout approvals by 4 Feb → CAD 9 Feb → Letter #2 issued 23 Feb (not before 31 Dec 26) → signed 9 Mar → Move to Cost 10 Mar"},
+        {p:"design",  when:"to 10 Mar 27", steps:"CAD 30 Nov 26 → Layout approvals by 4 Feb → Letter #2 issued 23 Feb (not before 31 Dec 26) → signed 9 Mar → Move to Cost 10 Mar"},
         {p:"cost",    when:"10 Mar – 9 Jun 27", steps:"Hickory pricing 14 May → Commercial review 21 May → QS certification 9 Jun"},
         {p:"dov",     when:"9 – 23 Jun 27", steps:"Purchaser accepts certified price 16 Jun → Variation approved and instructed 23 Jun"},
         {p:"joinery", when:"28 Jun – 18 Oct 27", steps:"Start 28 Jun → 1st submission 23 Aug → comments 6 Sep → resubmit 20 Sep → final review 5 Oct → approved for manufacture 18 Oct"},
@@ -1446,7 +1452,9 @@ function GanttTab(props){
           }
           var pos = layout(u);
           // Next step not yet done (ticked steps only count as done)
-          var nextStep = PROGRAMME.filter(function(s){ return !stepDone(s,u); })[0];
+          // Next step = the not-done step with the earliest target
+          var nextStep = PROGRAMME.filter(function(s){ return !stepDone(s,u); })
+            .sort(function(a,b){ return new Date(tgt(a,u)) - new Date(tgt(b,u)); })[0];
           var overdueCount = PROGRAMME.filter(function(s){ return statusOf(s,u)==="overdue"; }).length;
           var onHold = !!u.onHold;
 
